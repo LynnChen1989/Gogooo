@@ -1,4 +1,4 @@
-package zabbix
+package main
 
 import (
 	"bytes"
@@ -16,7 +16,7 @@ type Request struct {
 	Jsonrpc string      `json:"jsonrpc"`
 	Method  string      `json:"method"`
 	Params  interface{} `json:"params"`
-	Auth    string      `json:"auth"`
+	Auth    string      `json:"auth,omitempty"` // omitempty表示如果为空置则忽略字段
 	Id      int32       `json:"id"`
 }
 
@@ -109,23 +109,22 @@ func (api *API) callBytes(method string, params interface{}) (b []byte, err erro
 	defer res.Body.Close()
 
 	b, err = ioutil.ReadAll(res.Body)
-	api.printf("Response[%d]: %s", res.StatusCode, b)
+	api.printf("Response(%d): %s", res.StatusCode, b)
 	return
 }
 
 // 封装调用方法
 func (api *API) Call(method string, params interface{}) (response Response, err error) {
 	b, err := api.callBytes(method, params)
-	if err != nil {
+	if err == nil {
 		err = json.Unmarshal(b, &response)
 	}
 	return
 }
 
 func (api *API) CallWithError(method string, params interface{}) (response Response, err error) {
-	log.Printf("request method: %s, rquest params: %s", method, params)
 	response, err = api.Call(method, params)
-	if err != nil && response.Error != nil {
+	if err == nil && response.Error != nil {
 		err = response.Error
 	}
 	return
