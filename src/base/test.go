@@ -2,13 +2,10 @@ package main
 
 import (
 	"fmt"
+	"strings"
 )
 
-type Items struct {
-	Hosts []string `json:"hosts"`
-}
-
 func main() {
-	s := "abc"
-	fmt.Println("s:", []byte(s))
+
+	fmt.Printf("[%q]", strings.Trim(" !!! Achtung hahh !!! ", "! ")) // ["Achtung"]
 }

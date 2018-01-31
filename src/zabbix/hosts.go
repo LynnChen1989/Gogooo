@@ -1,8 +1,6 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
@@ -19,6 +17,11 @@ var (
 
 type Items struct {
 	Hosts []string `json:"hosts"`
+}
+
+type Group struct {
+	GroupId string `json:"hostid"`
+	Name    string `json:"name"`
 }
 
 func init() {
@@ -128,32 +131,32 @@ func (api *API) GetInterfaceById(hid int) (ip string, err error) {
 	return
 }
 
-func main() {
-	api := getAPI()
-	_, err := api.Version()
-	if err != nil {
-		return
-	}
-
-	hosts, err := api.HostGet(Params{})
-	if err != nil {
-		return
-	}
-
-	var result map[string]interface{}
-	result = make(map[string]interface{})
-	for hid, name := range hosts {
-		api.printf("%d:%s", hid, name)
-		group, _ := api.GetGroupByID(hid)
-		ip, _ := api.GetInterfaceById(hid)
-
-		if item, ok := result[group].(*Items); ok {
-			result[group].(*Items).Hosts = append(item.Hosts, ip)
-		} else {
-			it := &Items{Hosts: []string{ip}}
-			result[group] = it
-		}
-	}
-	data, err := json.MarshalIndent(result, "", "\t")
-	fmt.Println(string(data))
-}
+//func main() {
+//	api := getAPI()
+//	_, err := api.Version()
+//	if err != nil {
+//		return
+//	}
+//
+//	hosts, err := api.HostGet(Params{"groupids": 51})
+//	if err != nil {
+//		return
+//	}
+//
+//	var result map[string]interface{}
+//	result = make(map[string]interface{})
+//	for hid, name := range hosts {
+//		api.printf("%d:%s", hid, name)
+//		group, _ := api.GetGroupByID(hid)
+//		ip, _ := api.GetInterfaceById(hid)
+//
+//		if item, ok := result[group].(*Items); ok {
+//			result[group].(*Items).Hosts = append(item.Hosts, ip)
+//		} else {
+//			it := &Items{Hosts: []string{ip}}
+//			result[group] = it
+//		}
+//	}
+//	data, err := json.MarshalIndent(result, "", "\t")
+//	fmt.Println(string(data))
+//}
