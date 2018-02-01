@@ -1,11 +1,15 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"strings"
 )
 
 func main() {
-
-	fmt.Printf("[%q]", strings.Trim(" !!! Achtung hahh !!! ", "! ")) // ["Achtung"]
+	meta := make(map[string]interface{})
+	hostVar := make(map[string]interface{})
+	hostVar["hostvars"] = make(map[string]interface{})
+	meta["_meta"] = hostVar
+	b, _ := json.Marshal(meta)
+	fmt.Println(string(b))
 }

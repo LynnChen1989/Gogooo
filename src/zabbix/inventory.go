@@ -62,6 +62,14 @@ func (api *API) PrintResult(hosts map[int]string, group string) {
 		if err != nil {
 			return
 		}
+		/*
+			下面这段主要解决慢的问题
+			http://docs.ansible.com/ansible/latest/dev_guide/developing_inventory.html#tuning-the-external-inventory-script
+		*/
+		hostVar := make(map[string]interface{})
+		hostVar["hostvars"] = make(map[string]interface{})
+		result["_meta"] = hostVar
+
 		if item, ok := result[group].(*Items); ok {
 			result[group].(*Items).Hosts = append(item.Hosts, ip)
 		} else {
