@@ -4,12 +4,24 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"log"
+	"net/http"
+	"os"
 	"reflect"
 	"strconv"
 	"strings"
+	"zbx"
 )
 
-func (api *API) GetGroup(params Params) (result map[int]string, err error) {
+var (
+	_api *IApi
+)
+
+type IApi struct {
+	zbx.API
+}
+
+func (api *IApi) GetGroup(params zbx.Params) (result map[int]string, err error) {
 	// 返回数据类型：{group_id: groupName}
 	output := []string{"groupid", "name"}
 	if _, present := params["output"]; !present {
@@ -35,8 +47,8 @@ func (api *API) GetGroup(params Params) (result map[int]string, err error) {
 }
 
 // 根据主机组名获取主机
-func (api *API) GetHostByGroup(group string) (results map[int]string) {
-	groups, err := api.GetGroup(Params{})
+func (api *IApi) GetHostByGroup(group string) (results map[int]string) {
+	groups, err := api.GetGroup(zbx.Params{})
 	if err != nil {
 		return
 	}
@@ -44,7 +56,7 @@ func (api *API) GetHostByGroup(group string) (results map[int]string) {
 		if strings.Trim(name, "") != strings.Trim(group, "") {
 			continue
 		}
-		hosts, err := api.HostGet(Params{"groupids": gid})
+		hosts, err := api.HostGet(zbx.Params{"groupids": gid})
 		if err != nil {
 			return
 		}
@@ -53,11 +65,11 @@ func (api *API) GetHostByGroup(group string) (results map[int]string) {
 	return
 }
 
-func (api *API) PrintResult(hosts map[int]string, group string) {
+func (api *IApi) PrintResult(hosts map[int]string, group string) {
 	result := make(map[string]interface{})
 
 	for hid, name := range hosts {
-		api.printf("%d:%s", hid, name)
+		api.Printf("%d:%s", hid, name)
 		ip, err := api.GetInterfaceById(hid)
 		if err != nil {
 			return
@@ -70,10 +82,10 @@ func (api *API) PrintResult(hosts map[int]string, group string) {
 		hostVar["hostvars"] = make(map[string]interface{})
 		result["_meta"] = hostVar
 
-		if item, ok := result[group].(*Items); ok {
-			result[group].(*Items).Hosts = append(item.Hosts, ip)
+		if item, ok := result[group].(*zbx.Items); ok {
+			result[group].(*zbx.Items).Hosts = append(item.Hosts, ip)
 		} else {
-			it := &Items{Hosts: []string{ip}}
+			it := &zbx.Items{Hosts: []string{ip}}
 			result[group] = it
 		}
 	}
@@ -83,6 +95,32 @@ func (api *API) PrintResult(hosts map[int]string, group string) {
 		return
 	}
 	fmt.Println(string(data))
+}
+
+func getAPI() *IApi {
+	if _api != nil {
+		return _api
+	}
+	url, user, password := os.Getenv("ZABBIX_URL"), os.Getenv("ZABBIX_USER"), os.Getenv("ZABBIX_PASSWORD")
+	a := zbx.NewAPI(url)
+	_api = &IApi{*a}
+	_api.SetClient(http.DefaultClient)
+	v := os.Getenv("ZABBIX_VERBOSE")
+	if v != "" && v != "0" {
+		_api.Logger = log.New(os.Stderr, "[zabbix] ", 0)
+	}
+
+	if user != "" {
+		auth, err := _api.Login(user, password)
+		if err != nil {
+			log.Fatal("Login Error")
+		}
+		if auth == "" {
+			log.Fatal("Login Failed")
+		}
+	}
+
+	return _api
 }
 
 func main() {
@@ -95,7 +133,7 @@ func main() {
 	groupName := flag.String("g", "", "Zabbix Group Name")
 	flag.Parse()
 	if *groupName == "" {
-		api.printf("Sorry, You need use [-g] appoint group")
+		api.Printf("Sorry, You need use [-g] appoint group")
 		return
 	}
 	hosts := api.GetHostByGroup(*groupName)

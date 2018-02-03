@@ -1,4 +1,4 @@
-package main
+package zbx
 
 import (
 	"bytes"
@@ -70,7 +70,7 @@ func (api *API) SetClient(c *http.Client) {
 }
 
 // 实现日志打印方法
-func (api *API) printf(format string, v ...interface{}) {
+func (api *API) Printf(format string, v ...interface{}) {
 	if api.Logger != nil {
 		api.Logger.Printf(format, v...)
 	}
@@ -89,7 +89,7 @@ func (api *API) callBytes(method string, params interface{}) (b []byte, err erro
 	if err != nil {
 		return
 	}
-	api.printf("Request(%s): %s", "POST", b)
+	api.Printf("Request(%s): %s", "POST", b)
 	req, err := http.NewRequest("POST", api.url, bytes.NewReader(b))
 	if err != nil {
 		return
@@ -102,14 +102,14 @@ func (api *API) callBytes(method string, params interface{}) (b []byte, err erro
 	// 发起请求
 	res, err := api.c.Do(req)
 	if err != nil {
-		api.printf("Error: %s", err)
+		api.Printf("Error: %s", err)
 		return
 	}
 
 	defer res.Body.Close()
 
 	b, err = ioutil.ReadAll(res.Body)
-	api.printf("Response(%d): %s", res.StatusCode, b)
+	api.Printf("Response(%d): %s", res.StatusCode, b)
 	return
 }
 

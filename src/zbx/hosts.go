@@ -1,4 +1,4 @@
-package main
+package zbx
 
 import (
 	"log"
@@ -101,7 +101,7 @@ func (api *API) GetGroupByID(hid int) (name string, err error) {
 	if len(tempResult) > 1 {
 		e := ExpectOneResult(len(tempResult))
 		err = &e
-		api.printf("HostId %d find Multi Group", hid)
+		api.Printf("HostId %d find Multi Group", hid)
 	} else {
 		for _, v := range tempResult {
 			v := reflect.ValueOf(v)
@@ -121,7 +121,7 @@ func (api *API) GetInterfaceById(hid int) (ip string, err error) {
 	if len(tempResult) != 1 {
 		e := ExpectOneResult(len(tempResult))
 		err = &e
-		api.printf("HostId %d find Multi IpAddress", len(tempResult))
+		api.Printf("HostId %d find Multi IpAddress", len(tempResult))
 	} else {
 		for _, v := range tempResult {
 			v := reflect.ValueOf(v)
