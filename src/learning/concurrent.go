@@ -2,17 +2,31 @@ package main
 
 import (
 	"fmt"
-	"runtime"
+	"time"
 )
 
-func say(s string) {
-	for i := 0; i < 5; i++ {
-		runtime.Gosched()
-		fmt.Println(s)
+func worker(id int, jobs <-chan int, results chan<- int) {
+	for j := range jobs {
+		fmt.Println("worker", id, "start job", j)
+		time.Sleep(time.Second)
+		fmt.Println("worker", id, "finish job", j)
+		results <- j * 2
 	}
 }
 
 func main() {
-	go say("world")
-	say("hello")
+	jobs := make(chan int, 1000)
+	results := make(chan int, 1000)
+	for w := 1; w <= 3; w++ {
+		go worker(w, jobs, results)
+	}
+
+	for j := 1; j <= 5; j++ {
+		jobs <- j
+	}
+
+	close(jobs)
+	for a := 1; a <= 5; a++ {
+		<-results
+	}
 }
