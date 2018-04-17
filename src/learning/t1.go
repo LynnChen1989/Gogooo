@@ -1,27 +1,21 @@
 package main
 
 import (
-	"fmt"
 	_ "fmt"
-	"net/http"
 	_ "net/http"
 	_ "net/url"
+	"fmt"
 )
 
-var client = &http.Client{}
+var channel chan int = make(chan int)
 
-func getMethod() {
-	uri := "http://studygolang.com/"
-	request, _ := http.NewRequest("GET", uri, nil)
-	response, _ := client.Do(request)
-
-	defer response.Body.Close()
-
-	if response.StatusCode == 200 {
-		fmt.Println("get request OK")
+func saySomething(str string) {
+	for i := 0; i <= 10; i ++ {
+		fmt.Println(str)
 	}
+	channel <- 0
 }
 
 func main() {
-	getMethod()
+	go saySomething("fuck")
 }
