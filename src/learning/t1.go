@@ -5,17 +5,44 @@ import (
 	_ "net/http"
 	_ "net/url"
 	"fmt"
+	"encoding/json"
 )
 
-var channel chan int = make(chan int)
+type Parameters struct {
+	Parameter []ParameterFormat `json:"parameter"`
+}
 
-func saySomething(str string) {
-	for i := 0; i <= 10; i ++ {
-		fmt.Println(str)
+type ParameterFormat struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
+var paras []ParameterFormat
+
+func JenkinsConstructParas(args map[string]string) {
+	for k, v := range args {
+		para := ParameterFormat{
+			Name:  k,
+			Value: v,
+		}
+		paras = append(paras, para)
 	}
-	channel <- 0
+}
+
+func GetPostParas(args map[string]string) (parameters Parameters) {
+	JenkinsConstructParas(args)
+	parameters = Parameters{
+		Parameter: paras,
+	}
+	return
 }
 
 func main() {
-	go saySomething("fuck")
+	args := map[string]string{
+		"name": "chenlin",
+		"age":  "18",
+		"sex":  "male",
+	}
+	data, _ := json.Marshal(GetPostParas(args))
+	fmt.Println(string(data))
 }
