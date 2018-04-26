@@ -1,39 +1,39 @@
 package main
 
-import (
-	"os"
-	"C"
-)
-
-func WrapAddRecord(domain string, subDomain string, recordType string, recordLine string, value string, ttl string) string {
-	UserId, Token := os.Getenv("UserId"), os.Getenv("Token")
-	dns := DnsRecord(&DnsPod{Id: UserId, Token: Token, Domain: domain})
-	id := dns.RecordCreate(subDomain, recordType, recordLine, value, ttl)
-	return id
-}
-
-func WrapDelRecord(domain string, recordId string) string {
-	UserId, Token := os.Getenv("UserId"), os.Getenv("Token")
-	dns := DnsRecord(&DnsPod{Id: UserId, Token: Token, Domain: domain})
-	id := dns.RecordRemove(recordId)
-	return id
-}
-
-func WrapModifyRecord(domain string, recordId string, subDomain string, recordType string,
-	recordLine string, value string, ttl string) string {
-
-	UserId, Token := os.Getenv("UserId"), os.Getenv("Token")
-	dns := DnsRecord(&DnsPod{Id: UserId, Token: Token, Domain: domain})
-	id := dns.RecordModify(recordId, subDomain, recordType, recordLine, value, ttl)
-	return id
-}
-
-func WrapGetRecord(domain string, subDomain string) string {
-	UserId, Token := os.Getenv("UserId"), os.Getenv("Token")
-	dns := DnsRecord(&DnsPod{Id: UserId, Token: Token, Domain: domain})
-	id := dns.RecordList(subDomain)
-	return id
-}
+//func WrapAddRecord(domain, subDomain, recordType, recordLine, value, ttl string) string {
+//	fmt.Println(domain)
+//	UserId, Token := os.Getenv("UserId"), os.Getenv("Token")
+//	dns := DnsRecord(&DnsPod{Id: UserId, Token: Token, Domain: domain})
+//	id := dns.RecordCreate(subDomain, recordType, recordLine, value, ttl)
+//	return id
+//}
+//
+//func WrapDelRecord(domain string, recordId string) string {
+//	UserId, Token := os.Getenv("UserId"), os.Getenv("Token")
+//	dns := DnsRecord(&DnsPod{Id: UserId, Token: Token, Domain: domain})
+//	id := dns.RecordRemove(recordId)
+//	return id
+//}
+//
+//func WrapModifyRecord(domain string, recordId string, subDomain string, recordType string,
+//	recordLine string, value string, ttl string) string {
+//
+//	UserId, Token := os.Getenv("UserId"), os.Getenv("Token")
+//	dns := DnsRecord(&DnsPod{Id: UserId, Token: Token, Domain: domain})
+//	id := dns.RecordModify(recordId, subDomain, recordType, recordLine, value, ttl)
+//	return id
+//}
+//
+//func WrapGetRecord(domain string, subDomain string) string {
+//	UserId, Token := os.Getenv("UserId"), os.Getenv("Token")
+//	dns := DnsRecord(&DnsPod{Id: UserId, Token: Token, Domain: domain})
+//	id := dns.RecordList(subDomain)
+//	return id
+//}
+//
+//func main() {
+//	WrapAddRecord("fffpl.cn", "fuck.test", "A", "0", "10.10.10.19", "600")
+//}
 
 //func main() {
 //	UserId, Token := os.Getenv("UserId"), os.Getenv("Token")

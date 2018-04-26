@@ -62,7 +62,7 @@ func (dp *DnsPod) dpPost(url string, reqData map[string][]string) {
 func (dp *DnsPod) RecordCreate(subDomain string, recordType string, recordLine string, value string, ttl string) string {
 	if !(recordLine == "0" || recordLine == "3=0") {
 		// 0 表示默认线路， 3=0表示海外线路
-		log.Fatalf("recordLine error, just support: '0' or '3=0'")
+		log.Fatalln("recordLine error, just support: '0' or '3=0', get:", recordLine)
 		os.Exit(1)
 	}
 	domainId := strconv.Itoa(dp.GetDomainId())
