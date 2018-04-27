@@ -3,15 +3,17 @@ package main
 import (
 	"os"
 	"C"
+	"fmt"
 )
 
 
 //export WrapAddRecord
-func WrapAddRecord(domain, subDomain, recordType, recordLine, value, ttl *C.char) string {
+func WrapAddRecord(domain, subDomain, recordType, recordLine, value, ttl *C.char) *C.char {
 	UserId, Token := os.Getenv("UserId"), os.Getenv("Token")
 	dns := DnsRecord(&DnsPod{Id: UserId, Token: Token, Domain: C.GoString(domain)})
 	id := dns.RecordCreate(C.GoString(subDomain), C.GoString(recordType), C.GoString(recordLine), C.GoString(value), C.GoString(ttl))
-	return id
+	fmt.Println()
+	return C.CString(id)
 }
 
 //export WrapDelRecord
