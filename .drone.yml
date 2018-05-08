@@ -4,3 +4,5 @@ pipeline:
     commands:
       - go get
       - go build
+
+
