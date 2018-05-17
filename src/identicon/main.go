@@ -21,8 +21,8 @@ func getEnv(key, fallback string) string {
 	return fallback
 }
 
-var ServerHost = getEnv("ServerHost", "0.0.0.0")
-var ServerPort = getEnv("ServerPort", "9090")
+var ServerHost = getEnv("ServerHost", "password.ops.dragonest.com")
+var ServerPort = getEnv("ServerPort", "80")
 
 func GenerateAvatarHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -43,7 +43,7 @@ func GenerateAvatarHandler(w http.ResponseWriter, r *http.Request) {
 	if keyCnt < 1 {
 		data = Response{Code: 400, Message: "bad request, you must provide args named `key`"}
 	} else {
-		data = Response{Code: 200, Message: fmt.Sprintf("http://%s:%s/avatar/%s.png", ServerHost, ServerPort, Value)}
+		data = Response{Code: 200, Message: fmt.Sprintf("http://%s/avatar/%s.png", ServerHost, Value)}
 	}
 	jData, err := json.Marshal(data)
 	if err != nil {
@@ -62,7 +62,7 @@ func main() {
 	http.HandleFunc("/", GenerateAvatarHandler)   // route
 	http.HandleFunc("/avatar/", GetAvatarHandler) // route
 	log.Printf("server starting on http://%s:%s", ServerHost, ServerPort)
-	err := http.ListenAndServe(fmt.Sprintf("%s:%s", ServerHost, ServerPort), nil) // listen port
+	err := http.ListenAndServe(fmt.Sprintf("0.0.0.0:%s", ServerPort), nil) // listen port
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
