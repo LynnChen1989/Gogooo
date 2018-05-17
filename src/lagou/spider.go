@@ -8,8 +8,7 @@ import (
 )
 
 var (
-	delayTime = time.Tick(time.Millisecond * 500)
-
+	delayTime    = time.Tick(time.Millisecond * 500)
 	jobScheduler = NewJobScheduler()
 	jobPipeline  = NewJobPipeline()
 )

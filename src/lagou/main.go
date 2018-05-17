@@ -7,7 +7,7 @@ import (
 
 var (
 	kds = []string{
-		"golang",
+		"运维",
 	}
 	citys = []string{
 		"北京",

@@ -15,7 +15,6 @@ type LgJob struct {
 	City string
 	// 地区
 	District string
-
 	// 公司简称
 	CompanyShortName string
 	// 公司全称
