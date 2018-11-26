@@ -1,18 +1,18 @@
 package main
 
 import (
-	"net/http"
-	"fmt"
-	"os"
-	"io/ioutil"
 	"encoding/json"
-	"regexp"
+	"errors"
 	"flag"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"os"
 	"os/exec"
+	"path/filepath"
+	"regexp"
 	"syscall"
 	"time"
-	"errors"
-	"path/filepath"
 )
 
 var showCompletion bool
@@ -35,7 +35,7 @@ type Hosts struct {
 func writeCache(outputFile string, data string) {
 	mask := syscall.Umask(0)
 	defer syscall.Umask(mask)
-	err := ioutil.WriteFile(outputFile, []byte(data), 0600) // oct, not hex
+	err := ioutil.WriteFile(outputFile, []byte(data), 0777) // oct, not hex
 	if err != nil {
 		panic(err.Error())
 	}
@@ -44,7 +44,7 @@ func writeCache(outputFile string, data string) {
 func readCache(inputFile string) (data string, err error) {
 	oldMask := syscall.Umask(0) // set new mask, return old mask
 	defer syscall.Umask(oldMask)
-	f, err := os.OpenFile(inputFile, os.O_RDWR, 0600)
+	f, err := os.OpenFile(inputFile, os.O_RDWR, 0777)
 	if err != nil {
 		return
 	}
