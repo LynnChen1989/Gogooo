@@ -37,6 +37,7 @@ func (os *OptSLave) GetSLaveStatus(DB *sql.DB) (replStatus string) {
 		Error.Println("scan data error:", err)
 		return
 	}
+	DB.Close()
 	Info.Println("current replication status is: ", rs.Status)
 	return
 }
@@ -48,6 +49,7 @@ func (os *OptSLave) StopSlave(DB *sql.DB) {
 		Error.Println("stop salve status error:", err)
 		return
 	}
+	DB.Close()
 	Info.Println("stop slave success")
 }
 
@@ -58,5 +60,6 @@ func (os *OptSLave) StartSlave(DB *sql.DB) {
 		Error.Println("start salve status error:", err)
 		return
 	}
+	DB.Close()
 	Info.Println("start slave success")
 }
