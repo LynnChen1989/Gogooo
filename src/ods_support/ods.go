@@ -2,7 +2,6 @@ package main
 
 import (
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 )
@@ -13,7 +12,7 @@ var (
 	Error   *log.Logger
 )
 
-func Init(infoHandle io.Writer, warningHandle io.Writer, errorHandle io.Writer) {
+func Init() {
 
 	logFile, err := os.OpenFile("ods.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
@@ -31,6 +30,7 @@ func Init(infoHandle io.Writer, warningHandle io.Writer, errorHandle io.Writer) 
 	Error = log.New(io.MultiWriter(os.Stderr, logFile),
 		"[ERROR] ",
 		log.Ldate|log.Ltime|log.Lshortfile)
+
 }
 
 //func IndexHandler(w http.ResponseWriter, r *http.Request) {
@@ -42,6 +42,12 @@ func main() {
 	//fmt.Println("HttpServer Running ON 0.0.0.0:80001 ...")
 	//http.HandleFunc("/", IndexHandler)
 	//http.ListenAndServe("0.0.0.0:8001", nil)
-	Init(ioutil.Discard, os.Stdout, os.Stderr)
-	HandleDbSlave()
+	Init()
+	//StopSrv()
+	//PauseTimer()
+	//HandleDbSlave()
+	//RedisClient()
+	//httpPost("http://122.152.209.199:2046/api/v1/message/")
+	//SendNotify("test:test", "test")
+	HostGet()
 }

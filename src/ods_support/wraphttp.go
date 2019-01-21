@@ -1,25 +1,28 @@
 package main
 
 import (
-	"fmt"
+	"bytes"
 	"io/ioutil"
 	"net/http"
-	"strings"
 )
 
-func httpPost(url string) {
-	resp, err := http.Post(url,
-		"application/json",
-		strings.NewReader("name=cjb"))
-	if err != nil {
-		fmt.Println(err)
-	}
+func httpPost(url string, pb string) {
+	var jsonStr = []byte(pb)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
+	req.Header.Set("Content-Type", "application/json")
 
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		// handle error
-	}
+	Info.Println("response Status:", resp.Status)
+	Info.Println("response Headers:", resp.Header)
+	body, _ := ioutil.ReadAll(resp.Body)
+	Info.Println("response Body:", string(body))
+}
 
-	fmt.Println(string(body))
+func httpGet(url string) {
+	//
 }
