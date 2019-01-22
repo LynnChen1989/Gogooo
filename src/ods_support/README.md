@@ -10,6 +10,9 @@
 | REDIS_DB | 15 | REDIS 数据库
 | MESSAGE_URL | http://122.152.209.199:2046/api/v1/message/ | 消息系统URL 
 | MESSAGE_CID | 40001 | 消息系统CID
+| ZABBIX_URL | https://monitor.xwfintech.com/api_jsonrpc.php | 监控API地址
+| ZABBIX_USER | snakechen | 监控API用户名
+| ZABBIX_PASSWORD | 123 | 监控API密码
 
 
 

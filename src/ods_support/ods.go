@@ -49,5 +49,14 @@ func main() {
 	//RedisClient()
 	//httpPost("http://122.152.209.199:2046/api/v1/message/")
 	//SendNotify("test:test", "test")
-	HostGet()
+	api := getAPI()
+	_, err := api.Version()
+	if err != nil {
+		return
+	}
+
+	api.PauseAlert()
+	if err != nil {
+		return
+	}
 }

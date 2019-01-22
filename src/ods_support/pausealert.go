@@ -11,13 +11,14 @@ import (
 	"reflect"
 	"strconv"
 	"sync/atomic"
+	"time"
 )
 
 type Params map[string]interface{}
 
 var (
-	_host string
-	_api  *API
+	//_host string
+	_api *API
 )
 
 type Request struct {
@@ -145,6 +146,7 @@ func (api *API) Login(user, password string) (auth string, err error) {
 		return
 	}
 	auth = response.Result.(string)
+	Info.Println("get zabbix auth token success:", auth)
 	api.AuthToken = auth
 	return
 }
@@ -168,10 +170,21 @@ func getAPI() *API {
 	if _api != nil {
 		return _api
 	}
+	if os.Getenv("ZABBIX_URL") == "" {
+		Error.Println("environment variable ZABBIX_URL is needed")
+	}
+	if os.Getenv("ZABBIX_USER") == "" {
+		Error.Println("environment variable ZABBIX_USER is needed")
+	}
+	if os.Getenv("ZABBIX_PASSWORD") == "" {
+		Error.Println("environment variable ZABBIX_PASSWORD is needed")
+	}
 	url, user, password := os.Getenv("ZABBIX_URL"), os.Getenv("ZABBIX_USER"), os.Getenv("ZABBIX_PASSWORD")
+	Info.Println("Zabbix Url: ", url)
 	_api = NewAPI(url)
 	_api.SetClient(http.DefaultClient)
 	v := os.Getenv("ZABBIX_VERBOSE")
+
 	if v != "" && v != "0" {
 		_api.Logger = log.New(os.Stderr, "[zabbix] ", 0)
 	}
@@ -179,44 +192,78 @@ func getAPI() *API {
 	if user != "" {
 		auth, err := _api.Login(user, password)
 		if err != nil {
-			log.Fatal("Login Error")
+			Error.Println("Zabbix Login Error:", err)
 		}
 		if auth == "" {
-			log.Fatal("Login Failed")
+			Error.Println("Zabbix Login Failed")
+
 		}
 	}
-
 	return _api
 }
 
-func (api *API) HostGet(params Params) (result map[int]string, err error) {
-	// 判断key为output是否存在
-	output := [...]string{"hostid", "name"}
-	if _, present := params["output"]; !present {
-		params["output"] = output
-	}
-	response, err := api.CallWithError("host.get", params)
+func (api *API) GetHostIdByName(hostname string) (hid int) {
+	/* 接口格式
+		"params": {
+	        "filter": {
+	            "host": [
+	                "Zabbix server",
+	                "Linux server"
+	            ]
+	        }
+	    }
+	*/
+	var hosts = [...]string{hostname}
+	var hostFilter map[string]interface{}
+	hostFilter = make(map[string]interface{})
+	hostFilter["host"] = hosts
+	params := Params{"filter": hostFilter}
 
+	response, err := api.CallWithError("host.get", params)
 	if err != nil {
+		Error.Println("get host error:", err)
 		return
 	}
 
+	var stringHostId string
 	tempResult := response.Result.([]interface{})
-	result = make(map[int]string)
+	// 这里的逻辑有点傻
 	for _, v := range tempResult {
 		v := reflect.ValueOf(v)
-		name := v.MapIndex(reflect.ValueOf("name")).Interface().(string)
-		hostId := v.MapIndex(reflect.ValueOf("hostid")).Interface().(string)
-		n, _ := strconv.Atoi(hostId)
-		result[n] = name
+		stringHostId = v.MapIndex(reflect.ValueOf("hostid")).Interface().(string)
 	}
-	return
+
+	hids, err := strconv.Atoi(stringHostId)
+	//fmt.Println(int)
+	return hids
 }
 
-func HostGet() {
-	api := getAPI()
-	_, err := api.Version()
-	if err != nil {
-		return
-	}
+func (api *API) PauseAlert() {
+	/*
+
+	   "params":{
+	       "name":"Sunday maintenance",
+	       "active_since":1358844540,
+	       "active_till":1390466940,
+	       "groupids":[
+	           "2"
+	       ],
+	       "timeperiods":[
+	           {
+	               "timeperiod_type":3,
+	               "every":1,
+	               "dayofweek":64,
+	               "start_time":64800,
+	               "period":3600
+	           }
+	       ]
+	   }
+	*/
+	start := time.Now()
+	fmt.Println(start.Format("20060102150405"))
+	end := start.AddDate(0, 0, 1)
+	fmt.Println()
+
+	hostId := api.GetHostIdByName("shp-prod-bigdata-slave-for-loan")
+	fmt.Println(hostId)
 }
