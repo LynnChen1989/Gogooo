@@ -56,6 +56,8 @@ func main() {
 	}
 
 	api.PauseAlert()
+	//api.getPauseAlert()
+	api.RestoreAlert()
 	if err != nil {
 		return
 	}

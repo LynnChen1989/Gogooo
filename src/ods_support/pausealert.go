@@ -203,6 +203,7 @@ func getAPI() *API {
 }
 
 func (api *API) GetHostIdByName(hostname string) (hid int) {
+	// 根据主机名获取主机ID
 	/* 接口格式
 		"params": {
 	        "filter": {
@@ -239,6 +240,7 @@ func (api *API) GetHostIdByName(hostname string) (hid int) {
 }
 
 func (api *API) PauseAlert() {
+	// 创建告警屏蔽
 	/*
 
 	   "params":{
@@ -250,7 +252,7 @@ func (api *API) PauseAlert() {
 	       ],
 	       "timeperiods":[
 	           {
-	               "timeperiod_type":3,
+	               "timeperiods":3,
 	               "every":1,
 	               "dayofweek":64,
 	               "start_time":64800,
@@ -259,11 +261,67 @@ func (api *API) PauseAlert() {
 	       ]
 	   }
 	*/
+
 	start := time.Now()
-	fmt.Println(start.Format("20060102150405"))
+	startTimeStamp := start.Unix()
 	end := start.AddDate(0, 0, 1)
-	fmt.Println()
+	endTimeStamp := end.Unix()
 
 	hostId := api.GetHostIdByName("shp-prod-bigdata-slave-for-loan")
-	fmt.Println(hostId)
+	hostIds := [...]int{hostId}
+	timePeriodsContent := map[string]int{
+		"timeperiods": 0,
+	}
+	timePeriods := [1]map[string]int{timePeriodsContent}
+	params := Params{
+		"name":         "ODS抽数屏蔽主从告警",
+		"active_since": startTimeStamp,
+		"active_till":  endTimeStamp,
+		"hostids":      hostIds,
+		"timeperiods":  timePeriods,
+	}
+	response, err := api.CallWithError("maintenance.create", params)
+	if err != nil {
+		Error.Println("create maintenance error:", err)
+		return
+	}
+	tempResult := response.Result.(map[string]interface{})
+	for _, v := range tempResult {
+		Info.Println("maintenance is is", v)
+	}
+}
+
+func (api *API) getPauseAlert() (maintenanceID string) {
+	// 获取屏蔽ID
+	hostId := api.GetHostIdByName("shp-prod-bigdata-slave-for-loan")
+	hostIds := [...]int{hostId}
+	//fmt.Println(hostIds)
+	params := Params{
+		"hostids": hostIds,
+	}
+	response, err := api.CallWithError("maintenance.get", params)
+	if err != nil {
+		Error.Println("get maintenance error:", err)
+		return
+	}
+	//fmt.Println(response)
+	for _, v := range response.Result.([]interface{}) {
+		Info.Println("maintenance is is: ", v)
+		tmpValue := v.(map[string]interface{})
+		maintenanceID = tmpValue["maintenanceid"].(string)
+	}
+	Info.Println("get maintenance id is:", maintenanceID)
+	return
+}
+
+func (api *API) RestoreAlert() {
+	// 删除告警屏蔽
+	maintenanceId := api.getPauseAlert()
+	params := [1]string{maintenanceId}
+	_, err := api.CallWithError("maintenance.delete", params)
+	if err != nil {
+		Error.Println("delete maintenance error:", err)
+		return
+	}
+	Info.Println("delete maintenance success")
 }

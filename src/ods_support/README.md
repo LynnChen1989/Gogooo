@@ -13,6 +13,10 @@
 | ZABBIX_URL | https://monitor.xwfintech.com/api_jsonrpc.php | 监控API地址
 | ZABBIX_USER | snakechen | 监控API用户名
 | ZABBIX_PASSWORD | 123 | 监控API密码
+| DAP_DB_INFO | root:fhl3mjsdwj@tcp(172.16.1.18:5001)/db_dap | 序列服务MySQL  
+| CAS_DB_INFO | root:fhl3mjsdwj@tcp(172.16.1.18:5001)/cas | 信贷核心MySQL
+| ACT_DB_INFO | root:fhl3mjsdwj@tcp(172.16.1.18:5000)/db_act | 会计核算MySQL
+
 
 
 
