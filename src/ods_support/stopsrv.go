@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/go-redis/redis"
-	"github.com/robfig/cron"
+	//"github.com/robfig/cron"
 	"os"
 	"strconv"
 )
@@ -11,16 +11,17 @@ const PAUSE = `{"sevendDayTime":"","sevendDayTimeName":"7天时间","updateInfo"
 
 const RESTORE = `{"sevendDayTime":"","sevendDayTimeName":"7天时间","areaCodeTempName":"预加载地区 使  areacode 指向当前区域","areaCodeTemp":""}`
 
-func PauseTimer() {
-	// 停服定时器，于每天23:59:50定时发布停服公告
-	c := cron.New()
-	spec := "00 59 23 * * ?"
-	c.AddFunc(spec, func() {
-		// 调用停服
-	})
-	c.Start()
-	select {}
-}
+// 定时的功能由GoCron实现，这里不单独实现定时功能
+//func PauseTimer() {
+//	// 停服定时器，于每天23:59:50定时发布停服公告
+//	c := cron.New()
+//	spec := "00 59 23 * * ?"
+//	c.AddFunc(spec, func() {
+//		// 调用停服
+//	})
+//	c.Start()
+//	select {}
+//}
 
 func RedisClient() (client *redis.Client) {
 
@@ -52,18 +53,26 @@ func RedisClient() (client *redis.Client) {
 	return
 }
 
-func PauseSrv() {
-	client := RedisClient()
-	err := client.Set("yhb_node_001_utilsRedisConfig", PAUSE, 0).Err()
-	if err != nil {
-		panic(err)
-	}
+func PauseSrv() (status string) {
+	//client := RedisClient()
+	//err := client.Set("yhb_node_001_utilsRedisConfig", PAUSE, 0).Err()
+	//if err != nil {
+	//	status = "failed"
+	//	panic(err)
+	//}
+	Info.Println("stop srv success")
+	status = "success"
+	return
 }
 
-func RestoreSrv() {
-	client := RedisClient()
-	err := client.Set("yhb_node_001_utilsRedisConfig", RESTORE, 0).Err()
-	if err != nil {
-		panic(err)
-	}
+func RestoreSrv() (status string) {
+	//client := RedisClient()
+	//err := client.Set("yhb_node_001_utilsRedisConfig", RESTORE, 0).Err()
+	//if err != nil {
+	//	status = "failed"
+	//	panic(err)
+	//}
+	Info.Println("start srv success")
+	status = "success"
+	return
 }

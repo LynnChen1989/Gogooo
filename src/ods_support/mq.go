@@ -4,42 +4,27 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/streadway/amqp"
-	"log"
-	//"time"
 )
 
 var conn *amqp.Connection
 var channel *amqp.Channel
-var count = 0
 
+//var count = 0
 const queueName = "snake.queue.test"
 const exchange = "ods.finish.status"
 const uri = "amqp://snake:snake@127.0.0.1:5672/snakehost"
 
-func main() {
-	//go func() {
-	//	for {
-	//		push()
-	//		time.Sleep(1 * time.Second)
-	//	}
-	//}()
-	receive()
-	fmt.Println("end")
-	mclose()
-}
-func failOnErr(err error, msg string) {
-	if err != nil {
-		log.Fatalf("%s:%s", msg, err)
-		panic(fmt.Sprintf("%s:%s", msg, err))
-	}
-}
 func mqConnect() {
 	var err error
 	conn, err = amqp.Dial(uri)
-	failOnErr(err, "failed to connect tp rabbitmq")
+	if err != nil {
+		Error.Println("failed to connect tp rabbitmq")
+	}
 
 	channel, err = conn.Channel()
-	failOnErr(err, "failed to open a channel")
+	if err != nil {
+		Error.Println("failed to open a channel")
+	}
 }
 
 func mclose() {
@@ -47,9 +32,7 @@ func mclose() {
 	conn.Close()
 }
 
-//连接rabbitmq server
-func push() {
-
+func pushMsg() {
 	if channel == nil {
 		mqConnect()
 	}
@@ -61,24 +44,27 @@ func push() {
 	})
 }
 
-func receive() {
+func receiveMsg() {
 	if channel == nil {
 		mqConnect()
 	}
-	channel.ExchangeDeclare(exchange, "topic", true, false, false, true, nil)
+	//channel.ExchangeDeclare(exchange,"topic", true, false, false,true,nil)
+	Info.Printf("declare queue name: [%s]", queueName)
 	channel.QueueDeclare(queueName, true, true, false, true, nil)
+	Info.Printf("bind queue [%s] to exchange [%s]", queueName, exchange)
 	channel.QueueBind(queueName, queueName, exchange, false, nil)
-	msgs, err := channel.Consume(queueName, "", true, false, false, false, nil)
-	failOnErr(err, "")
+	messages, err := channel.Consume(queueName, "", true, false, false, false, nil)
+	if err != nil {
+		Error.Println("consume data error:", err)
+	}
 
 	forever := make(chan bool)
 
 	go func() {
 		//fmt.Println(*msgs)
-		for d := range msgs {
+		for d := range messages {
 			s := BytesToString(&(d.Body))
-			count++
-			fmt.Printf("receve msg is :%s -- %d\n", *s, count)
+			fmt.Printf("receve msg is :%s\n", *s)
 		}
 	}()
 
