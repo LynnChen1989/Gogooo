@@ -54,24 +54,24 @@ func RedisClient() (client *redis.Client) {
 }
 
 func PauseSrv() (status string) {
-	//client := RedisClient()
-	//err := client.Set("yhb_node_001_utilsRedisConfig", PAUSE, 0).Err()
-	//if err != nil {
-	//	status = "failed"
-	//	panic(err)
-	//}
+	client := RedisClient()
+	err := client.Set("yhb_node_001_utilsRedisConfig", PAUSE, 0).Err()
+	if err != nil {
+		status = "failed"
+		panic(err)
+	}
 	Info.Println("stop srv success")
 	status = "success"
 	return
 }
 
 func RestoreSrv() (status string) {
-	//client := RedisClient()
-	//err := client.Set("yhb_node_001_utilsRedisConfig", RESTORE, 0).Err()
-	//if err != nil {
-	//	status = "failed"
-	//	panic(err)
-	//}
+	client := RedisClient()
+	err := client.Set("yhb_node_001_utilsRedisConfig", RESTORE, 0).Err()
+	if err != nil {
+		status = "failed"
+		panic(err)
+	}
 	Info.Println("start srv success")
 	status = "success"
 	return

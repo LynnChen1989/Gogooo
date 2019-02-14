@@ -4,6 +4,9 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"os"
+	"regexp"
+	"strings"
 )
 
 type ReplStatus struct {
@@ -16,17 +19,46 @@ type DbWorker struct {
 	Dsn string
 }
 
-func HandleDbSlave() {
-	dbw := DbWorker{
-		Dsn: "root:fhl3mjsdwj@tcp(172.16.1.18:50001)/db_cms01",
-	}
-	db, err := sql.Open("mysql", dbw.Dsn)
-	if err != nil {
-		panic(err)
+func getMysqlDsnIpPort(Dns string) (ipPort string) {
+	pat := `(?s)\((.*)\)`
+	reg := regexp.MustCompile(pat)
+	ipPort = string(reg.Find([]byte(Dns)))
+	return
+}
+
+func BatchHandleDbSlave(status string) {
+	/*
+		批量处理主从的断开和恢复，status可选参数 start, stop
+	*/
+	slaveList := os.Getenv("SLAVE_LIST")
+	if slaveList == "" {
+		Error.Println("environment variable SLAVE_LIST is needed")
 		return
 	}
-	a := &OptSLave{}
-	a.GetSLaveStatus(db)
+	var allSlaveStatus string
+	for _, mysqlDns := range strings.Split(slaveList, "##") {
+		dbw := DbWorker{
+			Dsn: mysqlDns,
+		}
+		db, err := sql.Open("mysql", dbw.Dsn)
+		if err != nil {
+			panic(err)
+			return
+		}
+		a := &OptSLave{}
+		if status == "stop" {
+			Info.Printf("now stop slave on [%s]", mysqlDns)
+			//a.StopSlave(db)
+			slaveStatus := a.GetSLaveStatus(db)
+			allSlaveStatus += getMysqlDsnIpPort(mysqlDns) + "SLAVE:" + slaveStatus + ","
+		} else if status == "start" {
+			Info.Printf("now start slave on [%s]", mysqlDns)
+			//a.StartSlave(db)
+			slaveStatus := a.GetSLaveStatus(db)
+			allSlaveStatus += getMysqlDsnIpPort(mysqlDns) + "SLAVE:" + slaveStatus + ","
+		}
+	}
+	SendNotify("general", "ODS抽数:主从状态", allSlaveStatus)
 }
 
 func (os *OptSLave) GetSLaveStatus(DB *sql.DB) (replStatus string) {
@@ -39,6 +71,7 @@ func (os *OptSLave) GetSLaveStatus(DB *sql.DB) (replStatus string) {
 	}
 	DB.Close()
 	Info.Println("current replication status is: ", rs.Status)
+	replStatus = rs.Status
 	return
 }
 

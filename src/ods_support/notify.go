@@ -17,7 +17,7 @@ func SendNotify(level string, title string, content string) {
 	}
 
 	var messageCid int
-
+	// TODO: 这里后面根据级别调整对应的告警CID
 	if level == "general" {
 		messageCid = 10004
 	} else if level == "average" {
@@ -30,6 +30,8 @@ func SendNotify(level string, title string, content string) {
 	}
 
 	messageUrl := os.Getenv("MESSAGE_URL")
-	message := fmt.Sprintf(`{"cid": %s, "title": "%s", "content": "%s"}`, messageCid, title, content)
+	Info.Printf("MESSAGE_URL is: %s", messageUrl)
+	message := fmt.Sprintf(`{"cid": %d, "title": "%s", "content": "%s"}`, messageCid, title, content)
+	Info.Println(message)
 	httpPost(messageUrl, message)
 }

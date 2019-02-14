@@ -4,18 +4,22 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/streadway/amqp"
+	"os"
 )
 
 var conn *amqp.Connection
 var channel *amqp.Channel
 
-//var count = 0
 const queueName = "snake.queue.test"
-const exchange = "ods.finish.status"
-const uri = "amqp://snake:snake@127.0.0.1:5672/snakehost"
+const exchange = "ops.event.exchange"
 
 func mqConnect() {
 	var err error
+	uri := os.Getenv("MQ_URI")
+	if uri == "" {
+		Error.Println("environment variable MQ_URI is needed")
+		return
+	}
 	conn, err = amqp.Dial(uri)
 	if err != nil {
 		Error.Println("failed to connect tp rabbitmq")

@@ -60,12 +60,34 @@ func StartSrvHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, status)
 }
 
+//func MQConsumeHandler(w http.ResponseWriter, r *http.Request) {
+//	receiveMsg()
+//}
+
+func MQProductHandler(w http.ResponseWriter, r *http.Request) {
+	pushMsg()
+}
+
+func CutDateHandler(w http.ResponseWriter, r *http.Request) {
+	cd := &CutDate{}
+	cd.CheckCutDateStatus()
+}
+
+func SlaveHandler(w http.ResponseWriter, r *http.Request) {
+	BatchHandleDbSlave("stop")
+}
+
 func main() {
 	Init()
+	//receiveMsg()
 	Info.Println("HttpServer Running ON 0.0.0.0:8001 ...")
 	http.HandleFunc("/", IndexHandler)
 	http.HandleFunc("/stopsrv", StopSrvHandler)
 	http.HandleFunc("/startsrv", StartSrvHandler)
+	//http.HandleFunc("/consume-mq", MQConsumeHandler)
+	http.HandleFunc("/push-mq", MQProductHandler)
+	http.HandleFunc("/cutdate", CutDateHandler)
+	http.HandleFunc("/ss", SlaveHandler)
 	http.ListenAndServe("0.0.0.0:8001", nil)
 
 	//Init()
