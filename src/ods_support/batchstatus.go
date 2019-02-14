@@ -48,35 +48,38 @@ func (cd *CutDate) CheckCutDateStatus() (cutDateStatus bool) {
 		Error.Println("environment variable DAP_DB_INFO is needed")
 		return
 	}
-
 	casDbInfo := os.Getenv("CAS_DB_INFO")
 	if casDbInfo == "" {
 		Error.Println("environment variable CAS_DB_INFO is needed")
 		return
 	}
-
 	sqlLan01 := fmt.Sprintf("select count(1) as cnt from t_batch_group_execution where group_id='GCasDayCutGroup' and status='2' and DATE_FORMAT(end_time,'yyyy-MM-dd')=DATE_FORMAT(CURRENT_DATE,'yyyy-MM-dd')")
 	sqlLan02 := fmt.Sprintf("select count(1) as cnt from t_sys_conf where ACT_DATE = CURRENT_DATE and ACT_STAT = '2' and TXN_DATE = CURRENT_DATE and TXN_STAT = '2'")
-
-	sqls := [2]string{sqlLan01, sqlLan02}
-
-	for _, s := range sqls {
-		fmt.Println(s)
-		dapRows := CheckBatchStatus(dapDbInfo, s)
-		dapRows.Scan(&cnt)
-		if cnt > 0 {
-			cutDateStatus = true
-			Info.Println("cut date step check, success")
-		} else {
-			cutDateStatus = false
-			Error.Println("cut date step check, failure")
-		}
+	// 序列服务
+	dapRows := CheckBatchStatus(dapDbInfo, sqlLan01)
+	dapRows.Scan(&cnt)
+	if cnt > 0 {
+		cutDateStatus = true
+		Info.Printf("cut date step check, cnt: %d,success", cnt)
+	} else {
+		cutDateStatus = false
+		Error.Printf("cut date step check, cnt: %d, failure", cnt)
+	}
+	// 信贷核心
+	casRows := CheckBatchStatus(casDbInfo, sqlLan02)
+	casRows.Scan(&cnt)
+	if cnt > 0 {
+		cutDateStatus = true
+		Info.Printf("cut date step check, cnt: %d,success", cnt)
+	} else {
+		cutDateStatus = false
+		Error.Printf("cut date step check, cnt: %d, failure", cnt)
 	}
 	return
 }
 
-//
 //func CheckCutEndStatus() {
+//	// 检查日终状态
 //	var cnt int
 //
 //	dapDbInfo := os.Getenv("DAP_DB_INFO")
@@ -94,6 +97,7 @@ func (cd *CutDate) CheckCutDateStatus() (cutDateStatus bool) {
 //	sqlLan01 := fmt.Sprintf("select count(1) from t_batch_group_execution where status <> '2' and start_time > date_sub(now(), interval 30 minute);")
 //	sqlLan02 := fmt.Sprintf("select count(1) from t_act_system_para where ACCT_DATE = CURRENT_DATE and stat = '1' and MODIFY_TIME > date_sub(now(), interval 30 minute);")
 //	sqlLan03 := fmt.Sprintf("select count(1) from t_sys_conf where ACT_DATE = CURRENT_DATE and ACT_STAT = '0' and TXN_DATE = CURRENT_DATE and TXN_STAT = '0' and ACT_MODIFY_TIME > date_sub(now(), interval 30 minute) and TXN_MODIFY_TIME > date_sub(now(), interval 30 minute);")
+//
 //
 //	DbInfo := os.Getenv("DAP_DB_INFO")
 //	if DbInfo == "" {
