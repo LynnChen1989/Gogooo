@@ -11,18 +11,6 @@ const PAUSE = `{"sevendDayTime":"","sevendDayTimeName":"7天时间","updateInfo"
 
 const RESTORE = `{"sevendDayTime":"","sevendDayTimeName":"7天时间","areaCodeTempName":"预加载地区 使  areacode 指向当前区域","areaCodeTemp":""}`
 
-// 定时的功能由GoCron实现，这里不单独实现定时功能
-//func PauseTimer() {
-//	// 停服定时器，于每天23:59:50定时发布停服公告
-//	c := cron.New()
-//	spec := "00 59 23 * * ?"
-//	c.AddFunc(spec, func() {
-//		// 调用停服
-//	})
-//	c.Start()
-//	select {}
-//}
-
 func RedisClient() (client *redis.Client) {
 	redisHost, redisPassword, redisDb := os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PASSWORD"), os.Getenv("REDIS_DB")
 	rDb, err := strconv.Atoi(redisDb)
