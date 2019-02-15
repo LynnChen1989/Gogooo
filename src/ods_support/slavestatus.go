@@ -31,10 +31,6 @@ func BatchHandleDbSlave(status string) {
 		批量处理主从的断开和恢复，status可选参数 start, stop
 	*/
 	slaveList := os.Getenv("SLAVE_LIST")
-	if slaveList == "" {
-		Error.Println("environment variable SLAVE_LIST is needed")
-		return
-	}
 	var allSlaveStatus string
 	for _, mysqlDns := range strings.Split(slaveList, "##") {
 		dbw := DbWorker{

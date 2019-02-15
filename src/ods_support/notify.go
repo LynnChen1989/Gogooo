@@ -12,9 +12,6 @@ type NotifyRequest struct {
 }
 
 func SendNotify(level string, title string, content string) {
-	if os.Getenv("MESSAGE_URL") == "" {
-		Error.Println("environment variable MESSAGE_URL is needed")
-	}
 
 	var messageCid int
 	// TODO: 这里后面根据级别调整对应的告警CID
@@ -30,7 +27,6 @@ func SendNotify(level string, title string, content string) {
 	}
 
 	messageUrl := os.Getenv("MESSAGE_URL")
-	Info.Printf("MESSAGE_URL is: %s", messageUrl)
 	message := fmt.Sprintf(`{"cid": %d, "title": "%s", "content": "%s"}`, messageCid, title, content)
 	Info.Println(message)
 	httpPost(messageUrl, message)

@@ -18,10 +18,7 @@
 | ACT_DB_INFO | root:fhl3mjsdwj@tcp(172.16.1.18:5000)/db_act | 会计核算MySQL
 | MQ_URI | amqp://snake:snake@127.0.0.1:5672/snakehost | 消息队列地址
 | SLAVE_LIST | amqp://snake:snake@127.0.0.1:5672/snakehost##amqp://snake:snake@127.0.0.1:5672/snakehost| 从库的列表，用两个井号隔开
-
-
-
-
+| JUDGE_ODS_DB_INFO | root:root@tcp(192.168.0.53:3306)/db_ops4ods | 各个业务系统跑批状态判断
 
 
 

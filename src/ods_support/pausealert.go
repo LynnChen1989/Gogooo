@@ -170,15 +170,6 @@ func getAPI() *API {
 	if _api != nil {
 		return _api
 	}
-	if os.Getenv("ZABBIX_URL") == "" {
-		Error.Println("environment variable ZABBIX_URL is needed")
-	}
-	if os.Getenv("ZABBIX_USER") == "" {
-		Error.Println("environment variable ZABBIX_USER is needed")
-	}
-	if os.Getenv("ZABBIX_PASSWORD") == "" {
-		Error.Println("environment variable ZABBIX_PASSWORD is needed")
-	}
 	url, user, password := os.Getenv("ZABBIX_URL"), os.Getenv("ZABBIX_USER"), os.Getenv("ZABBIX_PASSWORD")
 	Info.Println("Zabbix Url: ", url)
 	_api = NewAPI(url)

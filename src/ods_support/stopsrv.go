@@ -24,21 +24,6 @@ const RESTORE = `{"sevendDayTime":"","sevendDayTimeName":"7天时间","areaCodeT
 //}
 
 func RedisClient() (client *redis.Client) {
-
-	if os.Getenv("REDIS_HOST") == "" {
-		Error.Println("environment variable REDIS_HOST is needed")
-		return
-	}
-
-	if os.Getenv("REDIS_PASSWORD") == "" {
-		Error.Println("environment variable REDIS_PASSWORD is needed")
-		return
-	}
-
-	if os.Getenv("REDIS_DB") == "" {
-		Error.Println("environment variable REDIS_DB is needed")
-		return
-	}
 	redisHost, redisPassword, redisDb := os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PASSWORD"), os.Getenv("REDIS_DB")
 	rDb, err := strconv.Atoi(redisDb)
 	if err != nil {

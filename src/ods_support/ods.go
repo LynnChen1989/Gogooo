@@ -2,38 +2,8 @@ package main
 
 import (
 	"fmt"
-	"io"
-	"log"
 	"net/http"
-	"os"
 )
-
-var (
-	Info    *log.Logger
-	Warning *log.Logger
-	Error   *log.Logger
-)
-
-func Init() {
-
-	logFile, err := os.OpenFile("ods.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatalln("open log file error: ", err)
-	}
-
-	Info = log.New(io.MultiWriter(os.Stderr, logFile),
-		"[INFO] ",
-		log.Ldate|log.Ltime|log.Lshortfile)
-
-	Warning = log.New(io.MultiWriter(os.Stderr, logFile),
-		"[WARNING] ",
-		log.Ldate|log.Ltime|log.Lshortfile)
-
-	Error = log.New(io.MultiWriter(os.Stderr, logFile),
-		"[ERROR] ",
-		log.Ldate|log.Ltime|log.Lshortfile)
-
-}
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	//HandleDbSlave()
@@ -71,6 +41,7 @@ func MQProductHandler(w http.ResponseWriter, r *http.Request) {
 func CutDateHandler(w http.ResponseWriter, r *http.Request) {
 	cd := &CutDate{}
 	cd.CheckCutDateStatus()
+	cd.CheckCutEndStatus()
 }
 
 func SlaveHandler(w http.ResponseWriter, r *http.Request) {
@@ -78,8 +49,9 @@ func SlaveHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	Init()
-	//receiveMsg()
+	logInit()
+	envVariablesInitCheck()
+	go receiveMsg()
 	Info.Println("HttpServer Running ON 0.0.0.0:8001 ...")
 	http.HandleFunc("/", IndexHandler)
 	http.HandleFunc("/stopsrv", StopSrvHandler)
