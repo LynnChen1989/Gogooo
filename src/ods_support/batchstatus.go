@@ -118,5 +118,6 @@ func (cd *CutDate) CheckCutEndStatus() (cutEndStatus bool) {
 		cutEndStatus = false
 		Error.Printf("cut end step[3] check, cnt: %d, failure", cnt)
 	}
+	Info.Printf("cut end final status: [%t]", cutEndStatus)
 	return
 }
