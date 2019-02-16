@@ -26,11 +26,17 @@ func getMysqlDsnIpPort(Dns string) (ipPort string) {
 	return
 }
 
-func BatchHandleDbSlave(status string) {
+func BatchHandleDbSlave(system string, status string) {
 	/*
 		批量处理主从的断开和恢复，status可选参数 start, stop
 	*/
-	slaveList := os.Getenv("SLAVE_LIST")
+
+	var slaveList string
+	if system == "cascms" {
+		slaveList = os.Getenv("CAS_CMS_SLAVE_LIST")
+	} else if system == "act" {
+		slaveList = os.Getenv("ACT_SLAVE_LIST")
+	}
 	var allSlaveStatus string
 	for _, mysqlDns := range strings.Split(slaveList, "##") {
 		dbw := DbWorker{
@@ -44,12 +50,12 @@ func BatchHandleDbSlave(status string) {
 		a := &OptSLave{}
 		if status == "stop" {
 			Info.Printf("now stop slave on [%s]", mysqlDns)
-			//a.StopSlave(db)
+			a.StopSlave(db)
 			slaveStatus := a.GetSLaveStatus(db)
 			allSlaveStatus += getMysqlDsnIpPort(mysqlDns) + "SLAVE:" + slaveStatus + ","
 		} else if status == "start" {
 			Info.Printf("now start slave on [%s]", mysqlDns)
-			//a.StartSlave(db)
+			a.StartSlave(db)
 			slaveStatus := a.GetSLaveStatus(db)
 			allSlaveStatus += getMysqlDsnIpPort(mysqlDns) + "SLAVE:" + slaveStatus + ","
 		}

@@ -230,7 +230,7 @@ func (api *API) GetHostIdByName(hostname string) (hid int) {
 	return hids
 }
 
-func (api *API) PauseAlert() {
+func (api *API) PauseAlert() (Mid int) {
 	// 创建告警屏蔽
 	/*
 
@@ -280,9 +280,10 @@ func (api *API) PauseAlert() {
 	for _, v := range tempResult {
 		Info.Println("maintenance is is", v)
 	}
+	return
 }
 
-func (api *API) getPauseAlert() (maintenanceID string) {
+func (api *API) GetPauseAlert() (maintenanceID string) {
 	// 获取屏蔽ID
 	hostId := api.GetHostIdByName("shp-prod-bigdata-slave-for-loan")
 	hostIds := [...]int{hostId}
@@ -307,7 +308,7 @@ func (api *API) getPauseAlert() (maintenanceID string) {
 
 func (api *API) RestoreAlert() {
 	// 删除告警屏蔽
-	maintenanceId := api.getPauseAlert()
+	maintenanceId := api.GetPauseAlert()
 	params := [1]string{maintenanceId}
 	_, err := api.CallWithError("maintenance.delete", params)
 	if err != nil {

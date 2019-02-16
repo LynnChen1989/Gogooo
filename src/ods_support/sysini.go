@@ -12,22 +12,23 @@ var (
 	Error   *log.Logger
 )
 
-func envVariablesInitCheck() {
-	envAll := [...]string{"SLAVE_LIST", "DAP_DB_INFO", "CAS_DB_INFO", "MESSAGE_URL", "REDIS_HOST",
-		"REDIS_PASSWORD", "REDIS_DB", "ZABBIX_URL", "ZABBIX_USER", "ZABBIX_PASSWORD", "MQ_URI", "JUDGE_ODS_DB_INFO"}
+func EnvVariablesInitCheck() {
+	envAll := [...]string{"CAS_CMS_SLAVE_LIST", "ACT_SLAVE_LIST", "DAP_DB_INFO", "CAS_DB_INFO", "MESSAGE_URL",
+		"YHB_REDIS_HOST", "YHB_REDIS_PASSWORD", "YHB_REDIS_DB", "ZABBIX_URL", "ZABBIX_USER", "ZABBIX_PASSWORD",
+		"MQ_URI", "CACHE_REDIS_HOST", "CACHE_REDIS_PASSWORD", "CACHE_REDIS_DB"}
 
 	for _, e := range envAll {
 		envValue := os.Getenv(e)
 		if envValue == "" {
 			Error.Printf("environment variable [%s] is needed", e)
-			return
+			panic("you must input all environment variables")
 		} else {
 			Info.Printf("get environment %s, value: [%s]", e, envValue)
 		}
 	}
 }
 
-func logInit() {
+func LogInit() {
 	logFile, err := os.OpenFile("ods.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalln("open log file error: ", err)

@@ -5,12 +5,6 @@ import (
 	"os"
 )
 
-type NotifyRequest struct {
-	cid     string
-	title   string
-	content string
-}
-
 func SendNotify(level string, title string, content string) {
 
 	var messageCid int

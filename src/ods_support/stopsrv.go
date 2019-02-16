@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/go-redis/redis"
-	//"github.com/robfig/cron"
+
 	"os"
 	"strconv"
 )
@@ -11,8 +11,8 @@ const PAUSE = `{"sevendDayTime":"","sevendDayTimeName":"7天时间","updateInfo"
 
 const RESTORE = `{"sevendDayTime":"","sevendDayTimeName":"7天时间","areaCodeTempName":"预加载地区 使  areacode 指向当前区域","areaCodeTemp":""}`
 
-func RedisClient() (client *redis.Client) {
-	redisHost, redisPassword, redisDb := os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PASSWORD"), os.Getenv("REDIS_DB")
+func RedisClient(redisHost string, redisPassword string, redisDb string) (client *redis.Client) {
+	//redisHost, redisPassword, redisDb := os.Getenv("YHB_REDIS_HOST"), os.Getenv("YHB_REDIS_PASSWORD"), os.Getenv("YHB_REDIS_DB")
 	rDb, err := strconv.Atoi(redisDb)
 	if err != nil {
 		Error.Println("Covert variable redisDb to int error")
@@ -27,7 +27,7 @@ func RedisClient() (client *redis.Client) {
 }
 
 func PauseSrv() (status string) {
-	client := RedisClient()
+	client := RedisClient(os.Getenv("YHB_REDIS_HOST"), os.Getenv("YHB_REDIS_PASSWORD"), os.Getenv("YHB_REDIS_DB"))
 	err := client.Set("yhb_node_001_utilsRedisConfig", PAUSE, 0).Err()
 	if err != nil {
 		status = "failed"
@@ -39,7 +39,7 @@ func PauseSrv() (status string) {
 }
 
 func RestoreSrv() (status string) {
-	client := RedisClient()
+	client := RedisClient(os.Getenv("YHB_REDIS_HOST"), os.Getenv("YHB_REDIS_PASSWORD"), os.Getenv("YHB_REDIS_DB"))
 	err := client.Set("yhb_node_001_utilsRedisConfig", RESTORE, 0).Err()
 	if err != nil {
 		status = "failed"
