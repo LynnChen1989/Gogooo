@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 )
 
 type APIResponse struct {
@@ -22,9 +23,9 @@ func StopSrvHandler(w http.ResponseWriter, r *http.Request) {
 	r.Header.Add("Content-Type", "application/json")
 	status := PauseSrv()
 	if status == "success" {
-		SendNotify("general", "ODS抽数:关闭服务入口SUCCESS", "[API]关闭服务入口成功")
+		SendNotify("general", "ODS抽数:关闭服务入口SUCCESS"+Today(), "[API]关闭服务入口成功")
 	} else if status == "failed" {
-		SendNotify("fatal", "ODS抽数:关闭服务入口FAILURE", "[API]关闭服务入口失败")
+		SendNotify("fatal", "ODS抽数:关闭服务入口FAILURE"+Today(), "[API]关闭服务入口失败")
 	}
 	var rs APIResponse
 	rs.Data = "停服" + status
@@ -35,9 +36,9 @@ func StopSrvHandler(w http.ResponseWriter, r *http.Request) {
 func StartSrvHandler(w http.ResponseWriter, r *http.Request) {
 	status := RestoreSrv()
 	if status == "success" {
-		SendNotify("general", "ODS抽数:开启服务入口SUCCESS", "[API]开启服务入口成功")
+		SendNotify("general", "ODS抽数:开启服务入口SUCCESS"+Today(), "[API]开启服务入口成功")
 	} else if status == "failed" {
-		SendNotify("fatal", "ODS抽数:开启服务入口FAILURE", "[API]开启服务入口失败")
+		SendNotify("fatal", "ODS抽数:开启服务入口FAILURE"+Today(), "[API]开启服务入口失败")
 	}
 	var rs APIResponse
 	rs.Data = "启服" + status
@@ -47,22 +48,54 @@ func StartSrvHandler(w http.ResponseWriter, r *http.Request) {
 
 func MQProductHandler(w http.ResponseWriter, r *http.Request) {
 	PushCutBatchMsg()
+	var rs APIResponse
+	rs.Data = "通知下游服务消息已发送"
+	ret, _ := json.Marshal(rs)
+	fmt.Fprint(w, string(ret))
 }
 
-//
-//func CutDateHandler(w http.ResponseWriter, r *http.Request) {
-//	cd := &CutDate{}
-//	cd.CheckCutDateStatus()
-//	cd.CheckCutEndStatus()
-//}
+func CutDateHandler(w http.ResponseWriter, r *http.Request) {
+	cd := &CutDate{}
+	cutDate := cd.CheckCutDateStatus()
+	cutEnd := cd.CheckCutEndStatus()
+	var rs APIResponse
+	rs.Data = "日切:" + strconv.FormatBool(cutDate) + "," + "日终:" + strconv.FormatBool(cutEnd)
+	ret, _ := json.Marshal(rs)
+	fmt.Fprint(w, string(ret))
+}
 
-//func SlaveHandler(w http.ResponseWriter, r *http.Request) {
-//	BatchHandleDbSlave("cascms", "stop")
-//}
+func SlaveHandler(w http.ResponseWriter, r *http.Request) {
+	vars := r.URL.Query()
+	var rs APIResponse
+	system := vars.Get("system")
+	opt := vars.Get("opt")
+	if system == "" && opt == "" {
+		rs.Data = "system或opt参数缺失"
+	} else {
+		BatchHandleDbSlave(system, opt)
+	}
+	ret, _ := json.Marshal(rs)
+	fmt.Fprint(w, string(ret))
+}
 
-func StopAlertHandler(w http.ResponseWriter, r *http.Request) {
+func AlertHandler(w http.ResponseWriter, r *http.Request) {
+	vars := r.URL.Query()
+	opt := vars.Get("opt")
 	api := getAPI()
-	Info.Printf("Mid: [%d]", api.PauseAlert())
+	var rs APIResponse
+	if opt == "" {
+		rs.Data = "opt参数缺失"
+	} else {
+		if opt == "start" {
+			api.RestoreAlert()
+			rs.Data = "已解除告警屏蔽"
+		} else if opt == "stop" {
+			api.PauseAlert()
+			rs.Data = "已屏蔽告警"
+		}
+	}
+	ret, _ := json.Marshal(rs)
+	fmt.Fprint(w, string(ret))
 }
 
 func main() {
@@ -74,9 +107,9 @@ func main() {
 	http.HandleFunc("/stopsrv", StopSrvHandler)
 	http.HandleFunc("/startsrv", StartSrvHandler)
 	http.HandleFunc("/push", MQProductHandler)
-	//http.HandleFunc("/cutdate", CutDateHandler)
-	//http.HandleFunc("/ss", SlaveHandler)
-	http.HandleFunc("/stopalert", StopAlertHandler)
+	http.HandleFunc("/cut", CutDateHandler)
+	http.HandleFunc("/slave", SlaveHandler)
+	http.HandleFunc("/alert", AlertHandler)
 	http.ListenAndServe("0.0.0.0:8001", nil)
 	Info.Println("HttpServer Running ON 0.0.0.0:8001 ...")
 }

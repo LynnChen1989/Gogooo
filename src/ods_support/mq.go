@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/streadway/amqp"
 	"os"
 	"time"
@@ -15,6 +14,7 @@ const exchange = "ops.event.exchange"
 const odsQueue = "ods.batch.finish.queue"
 const bigDataQueue = "bigdata.batch.finish.queue"
 const pythonQueue = "python.batch.finish.queue"
+const pushKey = "loan.batch.finish"
 
 func mqConnect() {
 	var err error
@@ -53,7 +53,7 @@ func PushCutBatchMsg() {
 	message, _ := json.Marshal(cs)
 	//msgContent := "hello world!"
 	Info.Printf("pushing message: [%s]", message)
-	channel.Publish(exchange, "loan.batch.finish", false, false, amqp.Publishing{
+	channel.Publish(exchange, pushKey, false, false, amqp.Publishing{
 		ContentType: "text/plain",
 		Body:        message,
 	})
@@ -79,7 +79,6 @@ func ReceiveMsg() {
 			var odsFinish map[string]interface{}
 			for d := range messages {
 				if err := json.Unmarshal(d.Body, &odsFinish); err == nil {
-					fmt.Println(odsFinish["status"], odsFinish["system"])
 					Info.Printf("receive mq message, system:[%s], status:[%s]",
 						odsFinish["system"].(string), odsFinish["status"].(string))
 					//WriteOdsStatus(odsFinish["system"].(string), odsFinish["status"].(string))
@@ -112,9 +111,9 @@ func GetTodayOdsAllStatusFormRedis() (status bool) {
 			os.Getenv("CACHE_REDIS_PASSWORD"),
 			os.Getenv("CACHE_REDIS_DB"))
 		val := client.Get(key)
-		if val.Val() == "" {
+		if val.Val() == "failure" {
 			failure += 1
-		} else {
+		} else if val.Val() == "success" {
 			success += 1
 		}
 	}

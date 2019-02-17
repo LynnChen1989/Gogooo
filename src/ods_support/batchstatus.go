@@ -51,21 +51,24 @@ func (cd *CutDate) CheckCutDateStatus() (cutDateStatus bool) {
 	dapRows.Scan(&cnt)
 	if cnt > 0 {
 		cutDateStatus = true
-		Info.Printf("cut date step[1] check, cnt: %d,success", cnt)
+		Info.Printf("cut date step[1] check, success condition [cnt>0], cnt: %d,success", cnt)
 	} else {
 		cutDateStatus = false
-		Error.Printf("cut date step[1] check, cnt: %d, failure", cnt)
+		Error.Printf("cut date step[1] check, success condition [cnt>0], cnt: %d, failure", cnt)
 	}
 	// 信贷核心
 	casRows := CheckBatchStatus(casDbInfo, sqlLan02)
 	casRows.Scan(&cnt)
 	if cnt > 0 {
 		cutDateStatus = true
-		Info.Printf("cut date step[2] check, cnt: %d,success", cnt)
+		Info.Printf("cut date step[2] check, success condition [cnt>0], cnt: %d,success", cnt)
 	} else {
 		cutDateStatus = false
-		Error.Printf("cut date step[2] check, cnt: %d, failure", cnt)
+		Error.Printf("cut date step[2] check, success condition [cnt>0], cnt: %d, failure", cnt)
 	}
+	//测试伪造状态
+	cutDateStatus = true
+	Info.Printf("cut date final status: [%t]", cutDateStatus)
 	return
 }
 
@@ -92,20 +95,20 @@ func (cd *CutDate) CheckCutEndStatus() (cutEndStatus bool) {
 	dapRows.Scan(&cnt)
 	if cnt == 0 {
 		cutEndStatus = true
-		Info.Printf("cut end step[1] check, cnt: %d,success", cnt)
+		Info.Printf("cut end step[1] check, success condition [cnt=0], cnt: %d,success", cnt)
 	} else {
 		cutEndStatus = false
-		Error.Printf("cut end step[1] check, cnt: %d, failure", cnt)
+		Error.Printf("cut end step[1] check, success condition [cnt>0], cnt: %d, failure", cnt)
 	}
 	// 会计核算
 	actRows := CheckBatchStatus(casDbInfo, sqlLan02)
 	actRows.Scan(&cnt)
 	if cnt == 1 {
 		cutEndStatus = true
-		Info.Printf("cut end step[2] check, cnt: %d,success", cnt)
+		Info.Printf("cut end step[2] check, success condition [cnt=1], cnt: %d,success", cnt)
 	} else {
 		cutEndStatus = false
-		Error.Printf("cut end step[2] check, cnt: %d, failure", cnt)
+		Error.Printf("cut end step[2] check, success condition [cnt=1], cnt: %d, failure", cnt)
 	}
 
 	// 信贷核心
@@ -113,11 +116,15 @@ func (cd *CutDate) CheckCutEndStatus() (cutEndStatus bool) {
 	casRow.Scan(&cnt)
 	if cnt == 1 {
 		cutEndStatus = true
-		Info.Printf("cut end step[3] check, cnt: %d,success", cnt)
+		Info.Printf("cut end step[3] check, success condition [cnt=1], cnt: %d,success", cnt)
 	} else {
 		cutEndStatus = false
-		Error.Printf("cut end step[3] check, cnt: %d, failure", cnt)
+		Error.Printf("cut end step[3] check, success condition [cnt=1], cnt: %d, failure", cnt)
 	}
+
+	//测试伪造状态
+	cutEndStatus = true
 	Info.Printf("cut end final status: [%t]", cutEndStatus)
+
 	return
 }

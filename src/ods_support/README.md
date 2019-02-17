@@ -24,8 +24,7 @@
 | ACT_SLAVE_LIST | amqp://snake:snake@127.0.0.1:5672/snakehost##amqp://snake:snake@127.0.0.1:5672/snakehost| 从库的列表，用两个井号隔开
 
 
-
-## 系统设计
+## 系统整体设计逻辑
 
 ```shell
 
@@ -36,6 +35,61 @@
 ```
 
 
-## redis消息定义
+## 调试API
+
+#### 0、空接口
+
+```
+/ 
+
+```
+#### 1、关闭服务入口
+
+```
+GET /stopsrv
+```
+
+#### 2、开启服务入口
+
+```
+GET /startsrv
+```
+
+#### 3、通知下游服务
+
+```
+GET /push
+```
 
 
+#### 4、获取日切、日终状态
+
+```
+GET /cut
+```
+
+####  5、主从批量操作
+
+```
+GET /slave?system=act&opt=stop
+
+*system可选参数*
+ + act
+ + cascms
+ 
+*opt可选参数*
+ + start
+ + stop 
+
+```
+
+#### 6、告警操作
+
+```
+GET /alert?opt=stop
+ 
+*opt可选参数*
+ + start
+ + stop 
+
+```

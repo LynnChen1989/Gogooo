@@ -42,25 +42,24 @@ func BatchHandleDbSlave(system string, status string) {
 		dbw := DbWorker{
 			Dsn: mysqlDns,
 		}
-		db, err := sql.Open("mysql", dbw.Dsn)
-		if err != nil {
-			panic(err)
-			return
-		}
-		a := &OptSLave{}
+		opt := &OptSLave{}
 		if status == "stop" {
 			Info.Printf("now stop slave on [%s]", mysqlDns)
-			a.StopSlave(db)
-			slaveStatus := a.GetSLaveStatus(db)
+			db, _ := sql.Open("mysql", dbw.Dsn)
+			opt.StopSlave(db)
+			db, _ = sql.Open("mysql", dbw.Dsn)
+			slaveStatus := opt.GetSLaveStatus(db)
 			allSlaveStatus += getMysqlDsnIpPort(mysqlDns) + "SLAVE:" + slaveStatus + ","
 		} else if status == "start" {
 			Info.Printf("now start slave on [%s]", mysqlDns)
-			a.StartSlave(db)
-			slaveStatus := a.GetSLaveStatus(db)
+			db, _ := sql.Open("mysql", dbw.Dsn)
+			opt.StartSlave(db)
+			db, _ = sql.Open("mysql", dbw.Dsn)
+			slaveStatus := opt.GetSLaveStatus(db)
 			allSlaveStatus += getMysqlDsnIpPort(mysqlDns) + "SLAVE:" + slaveStatus + ","
 		}
 	}
-	SendNotify("general", "ODS抽数:主从状态", allSlaveStatus)
+	SendNotify("general", "ODS抽数:主从状态"+Today(), allSlaveStatus)
 }
 
 func (os *OptSLave) GetSLaveStatus(DB *sql.DB) (replStatus string) {

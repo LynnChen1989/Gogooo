@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-const PAUSE = `{"sevendDayTime":"","sevendDayTimeName":"7天时间","updateInfo":"亲爱的用户，我行将于本日00点00分进行会计核算，持续时间约20分钟，给您带来的不便敬请谅解。","areaCodeTempName":"预加载地区 使  areacode 指向当前区域","areaCodeTemp":""}`
+const PAUSE = `{"sevendDayTime":"","sevendDayTimeName":"7天时间","updateInfo":"亲爱的用户，我行系统将于本日23点50分开始自动进行本日会计核算，持续时间约20分钟，给您带来的不便敬请谅解。","areaCodeTempName":"预加载地区 使  areacode 指向当前区域","areaCodeTemp":""}`
 
 const RESTORE = `{"sevendDayTime":"","sevendDayTimeName":"7天时间","areaCodeTempName":"预加载地区 使  areacode 指向当前区域","areaCodeTemp":""}`
 
