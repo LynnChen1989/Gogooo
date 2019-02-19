@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/streadway/amqp"
 	"os"
-	"time"
 )
 
 var conn *amqp.Connection
@@ -42,9 +41,7 @@ func PushCutBatchMsg() {
 	if channel == nil {
 		mqConnect()
 	}
-	currentTime := time.Now()
-	today := currentTime.Format("2006-01-02")
-
+	today := NowFormatDate("2006-01-02")
 	cs := &CutStatus{
 		Dt:     today,
 		Status: "finish",
@@ -80,8 +77,7 @@ func ReceiveMsg() {
 				//WriteOdsStatus(odsFinish["system"].(string), odsFinish["status"].(string))
 
 				// 写入各个下游系统的状态到redis
-				currentTime := time.Now()
-				key := currentTime.Format("20060102") + odsFinish["system"].(string)
+				key := NowFormatDate("20060102") + odsFinish["system"].(string)
 
 				// 判断获取到当日的日期
 				//if currentTime.Format("2006-01-02") == odsFinish["cutDate"].(string) {
@@ -104,10 +100,9 @@ func GetTodayOdsAllStatusFormRedis() (status bool) {
 	status = false
 	var success int
 	var failure int
-	currentTime := time.Now()
 	systems := [3]string{"ods", "bigdata", "python"}
 	for _, sys := range systems {
-		key := currentTime.Format("20060102") + sys
+		key := NowFormatDate("20060102") + sys
 		client := RedisClient(
 			os.Getenv("CACHE_REDIS_HOST"),
 			os.Getenv("CACHE_REDIS_PASSWORD"),

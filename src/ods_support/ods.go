@@ -23,9 +23,9 @@ func StopSrvHandler(w http.ResponseWriter, r *http.Request) {
 	r.Header.Add("Content-Type", "application/json")
 	status := PauseSrv()
 	if status == "success" {
-		SendNotify("general", "ODS抽数:关闭服务入口SUCCESS"+Today(), "[API]关闭服务入口成功")
+		SendNotify("general", "ODS抽数:关闭服务入口SUCCESS"+NowFormatDate("20060102"), "[API]关闭服务入口成功")
 	} else if status == "failed" {
-		SendNotify("fatal", "ODS抽数:关闭服务入口FAILURE"+Today(), "[API]关闭服务入口失败")
+		SendNotify("fatal", "ODS抽数:关闭服务入口FAILURE"+NowFormatDate("20060102"), "[API]关闭服务入口失败")
 	}
 	var rs APIResponse
 	rs.Data = "停服" + status
@@ -36,9 +36,9 @@ func StopSrvHandler(w http.ResponseWriter, r *http.Request) {
 func StartSrvHandler(w http.ResponseWriter, r *http.Request) {
 	status := RestoreSrv()
 	if status == "success" {
-		SendNotify("general", "ODS抽数:开启服务入口SUCCESS"+Today(), "[API]开启服务入口成功")
+		SendNotify("general", "ODS抽数:开启服务入口SUCCESS"+NowFormatDate("20060102"), "[API]开启服务入口成功")
 	} else if status == "failed" {
-		SendNotify("fatal", "ODS抽数:开启服务入口FAILURE"+Today(), "[API]开启服务入口失败")
+		SendNotify("fatal", "ODS抽数:开启服务入口FAILURE"+NowFormatDate("20060102"), "[API]开启服务入口失败")
 	}
 	var rs APIResponse
 	rs.Data = "启服" + status

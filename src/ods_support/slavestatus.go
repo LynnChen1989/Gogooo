@@ -59,7 +59,7 @@ func BatchHandleDbSlave(system string, status string) {
 			allSlaveStatus += getMysqlDsnIpPort(mysqlDns) + "SLAVE:" + slaveStatus + ","
 		}
 	}
-	SendNotify("general", "ODS抽数:主从状态"+Today(), allSlaveStatus)
+	SendNotify("general", "ODS_SUPPORT:主从状态"+NowFormatDate("20060102"), allSlaveStatus)
 }
 
 func (os *OptSLave) GetSLaveStatus(DB *sql.DB) (replStatus string) {

@@ -4,7 +4,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"time"
 )
 
 var (
@@ -12,12 +11,6 @@ var (
 	Warning *log.Logger
 	Error   *log.Logger
 )
-
-func Today() (today string) {
-	currentTime := time.Now()
-	today = currentTime.Format("20060102")
-	return
-}
 
 func EnvVariablesInitCheck() {
 	envAll := [...]string{
