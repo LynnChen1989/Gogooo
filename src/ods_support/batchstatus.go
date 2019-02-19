@@ -45,30 +45,31 @@ func (cd *CutDate) CheckCutDateStatus() (cutDateStatus bool) {
 	dapDbInfo := os.Getenv("DAP_DB_INFO")
 	casDbInfo := os.Getenv("CAS_DB_INFO")
 	sqlLan01 := fmt.Sprintf("select count(1) as cnt from t_batch_group_execution where group_id='GCasDayCutGroup' and status='2' and DATE_FORMAT(end_time,'yyyy-MM-dd')=DATE_FORMAT(CURRENT_DATE,'yyyy-MM-dd')")
-	sqlLan02 := fmt.Sprintf("select count(1) as cnt from t_sys_conf where ACT_DATE = CURRENT_DATE and ACT_STAT = '2' and TXN_DATE = CURRENT_DATE and TXN_STAT = '2'")
+	//sqlLan02 := fmt.Sprintf("select count(1) as cnt from t_sys_conf where ACT_DATE = CURRENT_DATE and ACT_STAT = '2' and TXN_DATE = CURRENT_DATE and TXN_STAT = '2'")
+	sqlLan02 := fmt.Sprintf("select count(1) as cnt from t_sys_conf where ACT_DATE = '2024-10-07' and ACT_STAT = '2' and TXN_DATE = '2024-10-07' and TXN_STAT = '2'")
 	// 序列服务
 	dapRows := CheckBatchStatus(dapDbInfo, sqlLan01)
 	dapRows.Scan(&cnt)
 	if cnt > 0 {
 		cutDateStatus = true
-		Info.Printf("cut date step[1] check, success condition [cnt>0], cnt: %d,success", cnt)
+		Info.Printf("日切检查 step[1] check, success condition [cnt>0], cnt: %d,success", cnt)
 	} else {
 		cutDateStatus = false
-		Error.Printf("cut date step[1] check, success condition [cnt>0], cnt: %d, failure", cnt)
+		Error.Printf("日切检查 step[1] check, success condition [cnt>0], cnt: %d, failure", cnt)
 	}
 	// 信贷核心
 	casRows := CheckBatchStatus(casDbInfo, sqlLan02)
 	casRows.Scan(&cnt)
 	if cnt > 0 {
 		cutDateStatus = true
-		Info.Printf("cut date step[2] check, success condition [cnt>0], cnt: %d,success", cnt)
+		Info.Printf("日切检查 step[2] check, success condition [cnt>0], cnt: %d,success", cnt)
 	} else {
 		cutDateStatus = false
-		Error.Printf("cut date step[2] check, success condition [cnt>0], cnt: %d, failure", cnt)
+		Error.Printf("日切检查 step[2] check, success condition [cnt>0], cnt: %d, failure", cnt)
 	}
 	//测试伪造状态
-	cutDateStatus = true
-	Info.Printf("cut date final status: [%t]", cutDateStatus)
+	//cutDateStatus = true
+	Info.Printf("日切检查最终状态: [%t]", cutDateStatus)
 	return
 }
 
@@ -87,28 +88,28 @@ func (cd *CutDate) CheckCutEndStatus() (cutEndStatus bool) {
 		return
 	}
 
-	sqlLan01 := fmt.Sprintf("select count(1) from t_batch_group_execution where status <> '2' and start_time > date_sub(now(), interval 30 minute);")
-	sqlLan02 := fmt.Sprintf("select count(1) from t_act_system_para where ACCT_DATE = CURRENT_DATE and stat = '1' and MODIFY_TIME > date_sub(now(), interval 30 minute);")
-	sqlLan03 := fmt.Sprintf("select count(1) from t_sys_conf where ACT_DATE = CURRENT_DATE and ACT_STAT = '0' and TXN_DATE = CURRENT_DATE and TXN_STAT = '0' and ACT_MODIFY_TIME > date_sub(now(), interval 30 minute) and TXN_MODIFY_TIME > date_sub(now(), interval 30 minute);")
+	sqlLan01 := fmt.Sprintf("select count(1) from t_batch_group_execution where status <> '2'")
+	sqlLan02 := fmt.Sprintf("select count(1) from t_act_system_para where ACCT_DATE = '2024-10-07' and stat = '1'")
+	sqlLan03 := fmt.Sprintf("select count(1) from t_sys_conf where ACT_DATE = '2024-10-07' and ACT_STAT = '0' and TXN_DATE = '2024-10-07' and TXN_STAT = '0'")
 
 	dapRows := CheckBatchStatus(dapDbInfo, sqlLan01)
 	dapRows.Scan(&cnt)
 	if cnt == 0 {
 		cutEndStatus = true
-		Info.Printf("cut end step[1] check, success condition [cnt=0], cnt: %d,success", cnt)
+		Info.Printf("日终检查 step[1] check, success condition [cnt=0], cnt: %d,success", cnt)
 	} else {
 		cutEndStatus = false
-		Error.Printf("cut end step[1] check, success condition [cnt>0], cnt: %d, failure", cnt)
+		Error.Printf("cut end step[1] check, success condition [cnt=0], cnt: %d, failure", cnt)
 	}
 	// 会计核算
 	actRows := CheckBatchStatus(casDbInfo, sqlLan02)
 	actRows.Scan(&cnt)
 	if cnt == 1 {
 		cutEndStatus = true
-		Info.Printf("cut end step[2] check, success condition [cnt=1], cnt: %d,success", cnt)
+		Info.Printf("日终检查 step[2] check, success condition [cnt=1], cnt: %d,success", cnt)
 	} else {
 		cutEndStatus = false
-		Error.Printf("cut end step[2] check, success condition [cnt=1], cnt: %d, failure", cnt)
+		Error.Printf("日终检查 step[2] check, success condition [cnt=1], cnt: %d, failure", cnt)
 	}
 
 	// 信贷核心
@@ -116,15 +117,15 @@ func (cd *CutDate) CheckCutEndStatus() (cutEndStatus bool) {
 	casRow.Scan(&cnt)
 	if cnt == 1 {
 		cutEndStatus = true
-		Info.Printf("cut end step[3] check, success condition [cnt=1], cnt: %d,success", cnt)
+		Info.Printf("日终检查 step[3] check, success condition [cnt=1], cnt: %d,success", cnt)
 	} else {
 		cutEndStatus = false
-		Error.Printf("cut end step[3] check, success condition [cnt=1], cnt: %d, failure", cnt)
+		Error.Printf("日终检查 step[3] check, success condition [cnt=1], cnt: %d, failure", cnt)
 	}
 
 	//测试伪造状态
-	cutEndStatus = true
-	Info.Printf("cut end final status: [%t]", cutEndStatus)
+	//cutEndStatus = true
+	Info.Printf("日终检查最终状态: [%t]", cutEndStatus)
 
 	return
 }

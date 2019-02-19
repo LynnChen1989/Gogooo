@@ -11,10 +11,9 @@ var conn *amqp.Connection
 var channel *amqp.Channel
 
 const exchange = "ops.event.exchange"
-const odsQueue = "ods.batch.finish.queue"
-const bigDataQueue = "bigdata.batch.finish.queue"
-const pythonQueue = "python.batch.finish.queue"
+const odsQueue = "ooops.batch.finish.queue"
 const pushKey = "loan.batch.finish"
+const receiveKey = "ops.listener.replicate"
 
 func mqConnect() {
 	var err error
@@ -63,42 +62,41 @@ func ReceiveMsg() {
 	if channel == nil {
 		mqConnect()
 	}
-	Info.Printf("declare queue name, ods: [%s], bigdata: [%s], python: [%s]", odsQueue, bigDataQueue, pythonQueue)
-	queues := [3]string{odsQueue, bigDataQueue, pythonQueue}
-	for _, q := range queues {
-		channel.QueueDeclare(q, true, true, false, true, nil)
-		Info.Printf("bind queue [%s] to exchange [%s]", q, exchange)
-		channel.QueueBind(q, q, exchange, false, nil)
-		Info.Printf("Queue [%s] Waiting for MQ messages", q)
-		messages, err := channel.Consume(q, "", true, false, false, false, nil)
-		if err != nil {
-			Error.Println("consume data error:", err)
-		}
-		// 接收到消息后，统一入库
-		go func() {
-			var odsFinish map[string]interface{}
-			for d := range messages {
-				if err := json.Unmarshal(d.Body, &odsFinish); err == nil {
-					Info.Printf("receive mq message, system:[%s], status:[%s]",
-						odsFinish["system"].(string), odsFinish["status"].(string))
-					//WriteOdsStatus(odsFinish["system"].(string), odsFinish["status"].(string))
+	Info.Printf("declare queue name, ods: [%s], ", odsQueue)
+	channel.QueueDeclare(odsQueue, true, true, false, true, nil)
+	Info.Printf("bind queue [%s] to exchange [%s]", odsQueue, exchange)
+	channel.QueueBind(odsQueue, receiveKey, exchange, false, nil)
+	Info.Printf("Queue [%s] Waiting for MQ messages", odsQueue)
+	messages, err := channel.Consume(odsQueue, "", true, false, false, false, nil)
+	if err != nil {
+		Error.Println("consume data error:", err)
+	}
+	go func() {
+		var odsFinish map[string]interface{}
+		for d := range messages {
+			if err := json.Unmarshal(d.Body, &odsFinish); err == nil {
+				Info.Printf("receive mq message, system:[%s], status:[%s], cutdate:[%s]",
+					odsFinish["system"].(string), odsFinish["status"].(string), odsFinish["cutDate"].(string))
+				//WriteOdsStatus(odsFinish["system"].(string), odsFinish["status"].(string))
 
-					// 写入各个下游系统的状态到redis
-					currentTime := time.Now()
-					key := currentTime.Format("20060102") + odsFinish["system"].(string)
+				// 写入各个下游系统的状态到redis
+				currentTime := time.Now()
+				key := currentTime.Format("20060102") + odsFinish["system"].(string)
 
-					// 判断获取到当日的日期
-					if currentTime.Format("2006-01-02") == odsFinish["cutDate"].(string) {
-						client := RedisClient(
-							os.Getenv("CACHE_REDIS_HOST"),
-							os.Getenv("CACHE_REDIS_PASSWORD"),
-							os.Getenv("CACHE_REDIS_DB"))
-						client.Set(key, odsFinish["status"].(string), 0)
-					}
+				// 判断获取到当日的日期
+				//if currentTime.Format("2006-01-02") == odsFinish["cutDate"].(string) {
+				if "2024-10-07" == odsFinish["cutDate"].(string) {
+					client := RedisClient(
+						os.Getenv("CACHE_REDIS_HOST"),
+						os.Getenv("CACHE_REDIS_PASSWORD"),
+						os.Getenv("CACHE_REDIS_DB"))
+					client.Set(key, odsFinish["status"].(string), 0)
+				} else {
+					Error.Println("fuck")
 				}
 			}
-		}()
-	}
+		}
+	}()
 
 }
 

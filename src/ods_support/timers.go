@@ -8,6 +8,12 @@ import (
 
 func OdsTimer() {
 	// 停服定时器，于每天23:59:50定时发布停服公告
+	today := NowFormatDate("20160102")
+	client := RedisClient(
+		os.Getenv("CACHE_REDIS_HOST"),
+		os.Getenv("CACHE_REDIS_PASSWORD"),
+		os.Getenv("CACHE_REDIS_DB"))
+
 	c := cron.New()
 	// 23点50分关闭服务入口
 	//spec01 := "0 50 23 * * ?"
@@ -30,6 +36,7 @@ func OdsTimer() {
 	c.AddFunc(spec02, func() {
 		cd := &CutDate{}
 		if cd.CheckCutDateStatus() {
+			client.Set("cutdate.status."+today, "success", 0)
 			//屏蔽告警
 			//api := getAPI()
 			Info.Println("-------- [*]STEP: prevent zabbix alert about MySQL master-slave -------- ")
@@ -51,6 +58,9 @@ func OdsTimer() {
 			} else if status == "failed" {
 				SendNotify("fatal", "ODS抽数:开启服务入口FAILURE"+Today(), "开启服务入口失败")
 			}
+		} else {
+			client.Set("cutdate.status."+today, "failure", 0)
+			SendNotify("fatal", "ODS抽数:日切状态"+Today(), "日切失败FAILURE")
 		}
 	})
 
@@ -59,11 +69,15 @@ func OdsTimer() {
 	spec03 := os.Getenv("CRON_CUT_END")
 	c.AddFunc(spec03, func() {
 		cd := &CutDate{}
+		if client.Get("cutdate.status."+today).Val() != "success" {
+			// 日切失败就不做日终检查
+			return
+		}
 		if cd.CheckCutEndStatus() {
 			//Redis: set "20190214cutend" "ok"
-			currentTime := time.Now()
-			key := currentTime.Format("20060102") + "cutend"
-			client := RedisClient(os.Getenv("CACHE_REDIS_HOST"),
+			key := today + "cutend.finsh"
+			client := RedisClient(
+				os.Getenv("CACHE_REDIS_HOST"),
 				os.Getenv("CACHE_REDIS_PASSWORD"),
 				os.Getenv("CACHE_REDIS_DB"))
 			val := client.Get(key)
@@ -77,8 +91,8 @@ func OdsTimer() {
 				SendNotify("general", "ODS抽数:开始通知下游系统抽数"+Today(), "开始通知下游系统抽数{python,ods,bigdata}")
 				Info.Println("-------- [*]STEP: notify downstream service[Python,ODS,Bigdata] to start job -------- ")
 				PushCutBatchMsg()
-				client.Set(key, "ok", 0)
-			} else if val.Val() == "ok" {
+				client.Set(key, "success", 0)
+			} else if val.Val() == "success" {
 				Info.Println("cutdate and cutend finish aleady push status to other job platform, ignore")
 			}
 		}
