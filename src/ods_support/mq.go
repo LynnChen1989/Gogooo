@@ -86,11 +86,15 @@ func ReceiveMsg() {
 					// 写入各个下游系统的状态到redis
 					currentTime := time.Now()
 					key := currentTime.Format("20060102") + odsFinish["system"].(string)
-					client := RedisClient(
-						os.Getenv("CACHE_REDIS_HOST"),
-						os.Getenv("CACHE_REDIS_PASSWORD"),
-						os.Getenv("CACHE_REDIS_DB"))
-					client.Set(key, odsFinish["status"].(string), 0)
+
+					// 判断获取到当日的日期
+					if currentTime.Format("2006-01-02") == odsFinish["cutDate"].(string) {
+						client := RedisClient(
+							os.Getenv("CACHE_REDIS_HOST"),
+							os.Getenv("CACHE_REDIS_PASSWORD"),
+							os.Getenv("CACHE_REDIS_DB"))
+						client.Set(key, odsFinish["status"].(string), 0)
+					}
 				}
 			}
 		}()

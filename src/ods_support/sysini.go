@@ -20,9 +20,26 @@ func Today() (today string) {
 }
 
 func EnvVariablesInitCheck() {
-	envAll := [...]string{"CAS_CMS_SLAVE_LIST", "ACT_SLAVE_LIST", "DAP_DB_INFO", "CAS_DB_INFO", "MESSAGE_URL",
-		"YHB_REDIS_HOST", "YHB_REDIS_PASSWORD", "YHB_REDIS_DB", "ZABBIX_URL", "ZABBIX_USER", "ZABBIX_PASSWORD",
-		"MQ_URI", "CACHE_REDIS_HOST", "CACHE_REDIS_PASSWORD", "CACHE_REDIS_DB"}
+	envAll := [...]string{
+		"CAS_CMS_SLAVE_LIST",
+		"ACT_SLAVE_LIST",
+		"DAP_DB_INFO",
+		"CAS_DB_INFO",
+		"MESSAGE_URL",
+		"YHB_REDIS_HOST",
+		"YHB_REDIS_PASSWORD",
+		"YHB_REDIS_DB",
+		"ZABBIX_URL",
+		"ZABBIX_USER",
+		"ZABBIX_PASSWORD",
+		"MQ_URI",
+		"CACHE_REDIS_HOST",
+		"CACHE_REDIS_PASSWORD",
+		"CACHE_REDIS_DB",
+		"CRON_STOP_SRV",
+		"CRON_CUT_DATE",
+		"CRON_CUT_END",
+		"CRON_RESTORE_SRV"}
 
 	for _, e := range envAll {
 		envValue := os.Getenv(e)

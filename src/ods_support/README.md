@@ -22,6 +22,10 @@
 | MQ_URI | amqp://snake:snake@127.0.0.1:5672/snakehost | 消息队列地址
 | CAS_CMS_SLAVE_LIST | amqp://snake:snake@127.0.0.1:5672/snakehost##amqp://snake:snake@127.0.0.1:5672/snakehost| 从库的列表，用两个井号隔开
 | ACT_SLAVE_LIST | amqp://snake:snake@127.0.0.1:5672/snakehost##amqp://snake:snake@127.0.0.1:5672/snakehost| 从库的列表，用两个井号隔开
+| CRON_STOP_SRV | 0 0 17 * * ?| 停服cron表达式
+| CRON_CUT_DATE | 0 0 17 * * ?| 日切cron表达式
+| CRON_CUT_END | 0 0 17 * * ?| 日终cron表达式
+| CRON_RESTORE_SRV | 0 0 17 * * ?| 启服cron表达式
 
 
 ## 系统整体设计逻辑
