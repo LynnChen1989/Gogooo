@@ -17,7 +17,6 @@ func OdsTimer() {
 	c := cron.New()
 	// 23点50分关闭服务入口
 	//spec01 := "0 50 23 * * ?"
-	//DEBUG
 	spec01 := os.Getenv("CRON_STOP_SRV")
 	c.AddFunc(spec01, func() {
 		Info.Println("-------- [*]STEP: start close CROS service entry point -------- ")
@@ -38,16 +37,16 @@ func OdsTimer() {
 		if cd.CheckCutDateStatus() {
 			client.Set("cutdate.status."+today, "success", 0)
 			//屏蔽告警
-			//api := getAPI()
+			api := getAPI()
 			Info.Println("-------- [*]STEP: prevent zabbix alert about MySQL master-slave -------- ")
-			//api.PauseAlert()
+			api.PauseAlert()
 			SendNotify("general", "ODS_SUPPORT:屏蔽告警"+NowFormatDate("20060102"), "[BEGIN]屏蔽主从异常告警")
 
 			time.Sleep(30 * time.Second)
 			//断开核心，管理主从
 			Info.Println("-------- [*]STEP: pause loan CAS and CMS MySQL master-slave -------- ")
 			SendNotify("general", "ODS_SUPPORT:断开主从"+NowFormatDate("20060102"), "[BEGIN]开始断开信贷核心{CAS}信贷管理{CMS}主从")
-			//BatchHandleDbSlave("cascms", "stop")
+			BatchHandleDbSlave("cascms", "stop")
 
 			//打开服务入口
 			Info.Println("-------- [*]STEP: pause loan CAS and CMS MySQL master-slave -------- ")
@@ -85,7 +84,7 @@ func OdsTimer() {
 				// 断开会计核算主从
 				Info.Println("-------- [*]STEP: pause loan ACT MySQL master-slave -------- ")
 				SendNotify("general", "ODS_SUPPORT:断开主从"+NowFormatDate("20060102"), "[BEGIN]断开会计核算主从{ACT}")
-				//BatchHandleDbSlave("act", "stop")
+				BatchHandleDbSlave("act", "stop")
 
 				//通知下游系统抽数
 				SendNotify("general", "ODS_SUPPORT:通知下游系统抽数"+NowFormatDate("20060102"), "[BEGIN]通知下游系统抽数{python,ods,bigdata}")
@@ -93,7 +92,7 @@ func OdsTimer() {
 				PushCutBatchMsg()
 				client.Set(key, "success", 0)
 			} else if val.Val() == "success" {
-				Info.Println("cutdate and cutend finish aleady push status to other job platform, ignore")
+				Info.Println("日切日终状态已通知下游服务，忽略")
 			}
 		}
 	})
@@ -124,7 +123,7 @@ func OdsTimer() {
 				api.RestoreAlert()
 				client.Set(key, "ok", 0)
 			} else if val.Val() == "ok" {
-				Info.Println("slave status and alert already restore, ignore")
+				Info.Println("主从状态已恢复，本次轮询结束，忽略操作")
 			}
 		}
 	})
