@@ -8,7 +8,7 @@ import (
 
 func OdsTimer() {
 	// 停服定时器，于每天23:59:50定时发布停服公告
-	today := NowFormatDate("20160102")
+	today := NowFormatDate("20060102")
 	client := RedisClient(
 		os.Getenv("CACHE_REDIS_HOST"),
 		os.Getenv("CACHE_REDIS_PASSWORD"),

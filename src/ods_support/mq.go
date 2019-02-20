@@ -80,8 +80,7 @@ func ReceiveMsg() {
 				key := NowFormatDate("20060102") + odsFinish["system"].(string)
 
 				// 判断获取到当日的日期
-				//if currentTime.Format("2006-01-02") == odsFinish["cutDate"].(string) {
-				if "2024-10-07" == odsFinish["cutDate"].(string) {
+				if NowFormatDate("2006-01-02") == odsFinish["cutDate"].(string) {
 					client := RedisClient(
 						os.Getenv("CACHE_REDIS_HOST"),
 						os.Getenv("CACHE_REDIS_PASSWORD"),
