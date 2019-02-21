@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/go-redis/redis"
 	"strconv"
+	"time"
 )
 
 func RedisClient() (client *redis.Client) {
@@ -26,6 +27,7 @@ func main() {
 	////fmt.Println(key)
 	//client := RedisClient()
 	//client.Set(key, "ok", 10000000)
-	var a int
-	fmt.Println(a)
+	fmt.Println("a")
+	time.Sleep(time.Second * 10)
+	fmt.Println("b")
 }

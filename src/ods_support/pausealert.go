@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -99,6 +100,14 @@ func (api *API) callBytes(method string, params interface{}) (b []byte, err erro
 		return
 	}
 	api.Printf("Request(%s): %s", "POST", b)
+	tr := &http.Transport{ //解决x509: certificate signed by unknown authority
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	api.c = http.Client{
+		Timeout:   15 * time.Second,
+		Transport: tr, //解决x509: certificate signed by unknown authority
+	}
+
 	req, err := http.NewRequest("POST", api.url, bytes.NewReader(b))
 	if err != nil {
 		return
