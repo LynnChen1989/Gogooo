@@ -18,7 +18,7 @@ func OdsTimer() {
 	// 23点50分关闭服务入口
 	//spec01 := "0 50 23 * * ?"
 	spec01 := os.Getenv("CRON_STOP_SRV")
-	c.AddFunc(spec01, func() {
+	_ = c.AddFunc(spec01, func() {
 		Info.Println("-------- [*]STEP: start close CROS service entry point -------- ")
 		PauseSrv()
 		status := PauseSrv()
@@ -35,6 +35,7 @@ func OdsTimer() {
 	c.AddFunc(spec02, func() {
 		cd := &CutDate{}
 		if cd.CheckCutDateStatus() {
+
 			client.Set("cutdate.status."+today, "success", 0)
 			//屏蔽告警
 			api := getAPI()
@@ -42,11 +43,11 @@ func OdsTimer() {
 			api.PauseAlert()
 			SendNotify("general", "ODS_SUPPORT:屏蔽告警"+NowFormatDate("20060102"), "[BEGIN]屏蔽主从异常告警")
 
-			time.Sleep(30 * time.Second)
+			time.Sleep(time.Second * 10)
 			//断开核心，管理主从
 			Info.Println("-------- [*]STEP: pause loan CAS and CMS MySQL master-slave -------- ")
 			SendNotify("general", "ODS_SUPPORT:断开主从"+NowFormatDate("20060102"), "[BEGIN]开始断开信贷核心{CAS}信贷管理{CMS}主从")
-			BatchHandleDbSlave("cascms", "stop")
+			//BatchHandleDbSlave("cascms", "stop")
 
 			//打开服务入口
 			Info.Println("-------- [*]STEP: pause loan CAS and CMS MySQL master-slave -------- ")
@@ -74,17 +75,15 @@ func OdsTimer() {
 		}
 		if cd.CheckCutEndStatus() {
 			//Redis: set "20190214cutend" "ok"
+			Info.Println("等待断开ACT主从关系")
+			time.Sleep(time.Second * 10)
 			key := today + "cutend.finsh"
-			client := RedisClient(
-				os.Getenv("CACHE_REDIS_HOST"),
-				os.Getenv("CACHE_REDIS_PASSWORD"),
-				os.Getenv("CACHE_REDIS_DB"))
 			val := client.Get(key)
 			if val.Val() == "" {
 				// 断开会计核算主从
 				Info.Println("-------- [*]STEP: pause loan ACT MySQL master-slave -------- ")
 				SendNotify("general", "ODS_SUPPORT:断开主从"+NowFormatDate("20060102"), "[BEGIN]断开会计核算主从{ACT}")
-				BatchHandleDbSlave("act", "stop")
+				//BatchHandleDbSlave("act", "stop")
 
 				//通知下游系统抽数
 				SendNotify("general", "ODS_SUPPORT:通知下游系统抽数"+NowFormatDate("20060102"), "[BEGIN]通知下游系统抽数{python,ods,bigdata}")
@@ -103,19 +102,16 @@ func OdsTimer() {
 	c.AddFunc(spec04, func() {
 		if GetTodayOdsAllStatusFormRedis() {
 			key := NowFormatDate("20060102") + "restore"
-			client := RedisClient(os.Getenv("CACHE_REDIS_HOST"),
-				os.Getenv("CACHE_REDIS_PASSWORD"),
-				os.Getenv("CACHE_REDIS_DB"))
 			val := client.Get(key)
 			if val.Val() == "" {
 				// 恢复会计核算主从状态
 				SendNotify("general", "ODS_SUPPORT:恢复主从"+NowFormatDate("20060102"), "[BEGIN]开始恢复会计核算主从{ACT}")
 				Info.Println("-------- [*]STEP: restore loan ACT MySQL master-slave -------- ")
-				BatchHandleDbSlave("act", "start")
+				//BatchHandleDbSlave("act", "start")
 				// 恢复信贷核心、信贷管理主从状态
 				SendNotify("general", "ODS_SUPPORT:恢复主从"+NowFormatDate("20060102"), "[BEGIN]开始恢复信贷核心{CAS}、信贷管理主从{CMS}")
 				Info.Println("-------- [*]STEP: restore loan CAS and CMS MySQL master-slave -------- ")
-				BatchHandleDbSlave("cascms", "start")
+				//BatchHandleDbSlave("cascms", "start")
 				// 恢复告警
 				api := getAPI()
 				SendNotify("general", "ODS_SUPPORT:告警恢复"+NowFormatDate("20060102"), "[BEGIN]解除主从异常告警屏蔽")
@@ -123,7 +119,7 @@ func OdsTimer() {
 				api.RestoreAlert()
 				client.Set(key, "ok", 0)
 			} else if val.Val() == "ok" {
-				Info.Println("主从状态已恢复，本次轮询结束，忽略操作")
+				Info.Println("主从状态/告警已恢复，本次轮询结束，忽略操作")
 			}
 		}
 	})

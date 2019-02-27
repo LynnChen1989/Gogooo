@@ -50,7 +50,6 @@ func LogInit() {
 	if err != nil {
 		log.Fatalln("open log file error: ", err)
 	}
-
 	Info = log.New(io.MultiWriter(os.Stderr, logFile),
 		"[INFO] ",
 		log.Ldate|log.Ltime|log.Lshortfile)

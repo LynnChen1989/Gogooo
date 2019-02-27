@@ -271,6 +271,7 @@ func (api *API) PauseAlert() (Mid int) {
 	hostIds := [...]int{hostId}
 	timePeriodsContent := map[string]int{
 		"timeperiods": 0,
+		"period":      36000,
 	}
 	timePeriods := [1]map[string]int{timePeriodsContent}
 	params := Params{
